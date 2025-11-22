@@ -86,6 +86,7 @@ h1{font-size:28px;}
   <div id="resultBig"></div>
   <div id="controls">
     <button class="btn" id="playAgain" style="display:none">再玩一次</button>
+    <button class="btn" id="restartBtn">重置遊戲</button>
   </div>
 </section>
 <div class="overlay" id="overlay"></div>
@@ -120,6 +121,7 @@ const roundNumEl=document.getElementById('roundNum');
 const livesEl=document.getElementById('lives');
 const resultBigEl=document.getElementById('resultBig');
 const playAgainBtn=document.getElementById('playAgain');
+const restartBtn=document.getElementById('restartBtn');
 const overlay=document.getElementById('overlay');
 
 let roundsData=[];
@@ -141,14 +143,10 @@ function setupRoundsData(){
   }
 }
 
-function showStorySequence(images, callback, finalText){
+function showStorySequence(images, callback){
   let idx = 0;
   function next(){
-    if(idx >= images.length){ 
-      if(finalText){ resultBigEl.textContent = finalText; }
-      callback(); 
-      return; 
-    }
+    if(idx >= images.length){ callback(); return; }
     busy = true;
     const img = doors[0].querySelector('.doorBack img');
     img.src = images[idx];
@@ -185,36 +183,45 @@ function openDoor(idx){
   const img=chosen.querySelector('.doorBack img');
   img.style.visibility='visible';
   const isWrong=img.src.includes(wrongImage);
-  if(isWrong){ lives=Math.max(0,lives-1); resultBigEl.textContent='❌'; }
+  if(isWrong){ 
+    lives=Math.max(0,lives-1); 
+    resultBigEl.textContent='❌'; 
+  }
   else resultBigEl.textContent='🤡';
   renderLives();
   setTimeout(()=>{
     if(round>=maxRounds){
       if(lives>0){
-        resultBigEl.textContent='WIN'; resultBigEl.style.fontSize='80px'; resultBigEl.style.color='red';
-        // 播完結尾故事
-        showStorySequence(storyEndImages, ()=>{}, null);
+        resultBigEl.textContent='';
+        showStorySequence(storyEndImages, ()=>{
+          resultBigEl.textContent='遊戲完成！';
+        });
+      } else {
+        playAgainBtn.style.display='inline-block';
       }
-      overlay.classList.remove('show');
-      busy=true;
-    }else{
+    } else {
       busy=false; overlay.classList.remove('show'); setupRound();
     }
   },600);
 }
 
-function startGame(){
+function showIntroText(callback){
+  resultBigEl.textContent='咦？這裡是哪裡？';
+  setTimeout(callback, 1200);
+}
+
+function resetGame(){
   round=0; lives=3; playAgainBtn.style.display='none'; resultBigEl.textContent=''; resultBigEl.style.fontSize='60px'; resultBigEl.style.color='red';
   setupRoundsData();
-  // 播前置故事，播放完後顯示文字
-  showStorySequence(storyImages, setupRound, "咦？這裡是哪裡？");
+  showStorySequence(storyImages, ()=>showIntroText(setupRound));
   overlay.classList.remove('show');
 }
 
 doors.forEach((d,i)=> d.addEventListener('click',()=>openDoor(i)));
-playAgainBtn.addEventListener('click',startGame);
+playAgainBtn.addEventListener('click',resetGame);
+restartBtn.addEventListener('click',resetGame);
 
-startGame();
+resetGame();
 </script>
 </body>
 </html>
