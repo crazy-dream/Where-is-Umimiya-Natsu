@@ -26,39 +26,25 @@ body{
 }
 header{margin-top:18px;text-align:center;}
 h1{margin:0;font-size:28px;letter-spacing:1px;}
-.topRow{
-  width:92%; max-width:980px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-top:14px;margin-bottom:6px;
-  padding:0 10px;
+.stage-container{
+  position:relative; width:100%; display:flex; justify-content:center;
 }
-#roundNum{
-  font-weight:800;font-size:20px;
-  background: rgba(255,255,255,0.6);
-  padding:6px 12px;
-  border-radius:10px;
-  color:var(--text);
+.topLeft{
+  position:absolute; top:10px; left:10px; font-weight:800; font-size:20px; background: rgba(255,255,255,0.6); padding:6px 12px; border-radius:10px;
 }
-#lives{display:flex;gap:8px;align-items:center;}
-.lifeDot{
-  width:28px;height:28px;border-radius:50%;
-  background:var(--accent);
-  box-shadow:0 4px 10px rgba(0,0,0,0.15);
+.topRight{
+  position:absolute; top:10px; right:10px; display:flex; gap:8px; align-items:center;
 }
+.lifeDot{width:28px;height:28px;border-radius:50%;background:var(--accent);box-shadow:0 4px 10px rgba(0,0,0,0.15);}
 .lifeDot.hidden{opacity:0.15;}
 .stage{
   width:92%; max-width:980px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:18px;
+  display:flex; flex-direction:column;
+  align-items:center; gap:18px;
   margin-bottom:40px;
 }
 .doors{
-  display:flex;
-  gap:36px;
+  display:flex; gap:36px;
   justify-content:center;
   align-items:flex-start;
   width:100%;
@@ -87,20 +73,33 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 }
 .doorBack{
   width:100%; height:100%;
-  border-radius:18px; background:white;
-  overflow:hidden; position:absolute; top:0; left:0;
-  display:flex; align-items:center; justify-content:center;
-  z-index:1; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
+  border-radius:18px;
+  background:white;
+  overflow:hidden;
+  position:absolute;
+  top:0; left:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
 }
 .doorBack img{
-  width:100%; height:100%;
-  object-fit:contain; display:block;
-  padding:8px; visibility: hidden;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  padding:8px;
+  visibility: hidden;
 }
 .opened .doorFront{ transform: rotateX(-180deg); }
 #resultBig{
-  margin-top:6px; font-size:60px; font-weight:900;
-  color:red; text-align:center; position:relative;
+  margin-top:6px;
+  font-size:60px;
+  font-weight:900;
+  color:red;
+  text-align:center;
+  position:relative;
 }
 #controls{ margin-top:14px; display:flex; gap:12px; align-items:center; }
 .btn{
@@ -114,22 +113,25 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 .overlay{
   position:fixed;left:0;top:0;right:0;bottom:0;
   z-index:999; display:none;
+  background:rgba(255,255,255,0.9);
+  display:flex; justify-content:center; align-items:center;
 }
-.overlay.show{ display:block; }
+.overlay img{
+  max-width:100%; max-height:100%;
+}
+.overlay.show{ display:flex; }
 @media(max-width:860px){
   .doorWrap{ width:86vw; height:50vw; }
 }
 </style>
 </head>
 <body>
-<header>
-  <h1>猜猜小丑在哪裡</h1>
-</header>
-<div class="topRow">
-  <div id="roundNum">0</div>
-  <div id="lives"></div>
+<header><h1>猜猜小丑在哪裡</h1></header>
+<div class="stage-container">
+  <div class="topLeft" id="roundNum">0</div>
+  <div class="topRight" id="lives"></div>
 </div>
-<section class="stage">
+<section class="stage" id="gameStage">
   <div class="doors">
     <div class="doorWrap" id="door0">
       <div class="doorBack"><img src="" alt="" /></div>
@@ -146,20 +148,20 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
     <button class="btn" id="restartBtn">重置遊戲</button>
   </div>
 </section>
-<div class="overlay" id="overlay"></div>
+<div class="overlay" id="overlay"><img src="" id="storyImg"></div>
 <script>
-// 前置故事 (洋芋片 1→2→3→4→7→8)
-const storyImages = [
-  "story/洋芋片1.jpg","story/洋芋片2.jpg",
-  "story/洋芋片3.jpg","story/洋芋片4.jpg",
-  "story/洋芋片7.jpg","story/洋芋片8.jpg"
+const storyStart = [
+  "story/洋芋片1.jpg",
+  "story/洋芋片2.jpg",
+  "story/洋芋片3.jpg",
+  "story/洋芋片4.jpg"
 ];
-// 遊戲結束後勝利播放
-const storyEndImages = ["story/洋芋片5.jpg","story/洋芋片6.jpg"];
-// 生命用光播放洋芋片9
-const lifeOverImage = "story/洋芋片9.jpg";
+const storyWin = [
+  "story/洋芋片5.jpg",
+  "story/洋芋片6.jpg"
+];
+const storyLose = ["story/洋芋片9.jpg"];
 
-// 小丑圖片
 const correctImages = [
 "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png","joker/3.png",
 "joker/4 (2).png","joker/4.png","joker/5.png","joker/546175134_1138063744950693_180659281319095751_n.jpg",
@@ -172,16 +174,19 @@ const correctImages = [
 const wrongImage = "Ri86b7h.jpg";
 
 const maxRounds = 6;
-let round = 0, lives = 3, busy=false, correctCount=0;
-const doors = [document.getElementById('door0'),document.getElementById('door1')];
-const roundNumEl = document.getElementById('roundNum');
-const livesEl = document.getElementById('lives');
-const resultBigEl = document.getElementById('resultBig');
-const playAgainBtn = document.getElementById('playAgain');
-const restartBtn = document.getElementById('restartBtn');
-const overlay = document.getElementById('overlay');
+let round=0, lives=3, busy=false;
+let currentCorrectDoor=0;
 
-// 生命點顯示
+const doors=[document.getElementById('door0'),document.getElementById('door1')];
+const roundNumEl=document.getElementById('roundNum');
+const livesEl=document.getElementById('lives');
+const resultBigEl=document.getElementById('resultBig');
+const playAgainBtn=document.getElementById('playAgain');
+const restartBtn=document.getElementById('restartBtn');
+const overlay=document.getElementById('overlay');
+const storyImg=document.getElementById('storyImg');
+const gameStage=document.getElementById('gameStage');
+
 function renderLives(){
   livesEl.innerHTML='';
   for(let i=0;i<lives;i++){ const d=document.createElement('div'); d.className='lifeDot'; livesEl.appendChild(d);}
@@ -189,110 +194,73 @@ function renderLives(){
 }
 function renderRound(){ roundNumEl.textContent=round; }
 
-let currentCorrectDoor=0;
-
-// 前置故事播放函式
 function showStorySequence(images, callback){
-  let idx = 0;
-  function next(){
-    if(idx>=images.length){ callback(); return; }
-    busy=true;
-    overlay.classList.add('show');
-    const imgEl=document.createElement('img');
-    imgEl.src=images[idx];
-    imgEl.style.position='fixed';
-    imgEl.style.top='0';
-    imgEl.style.left='0';
-    imgEl.style.width='100%';
-    imgEl.style.height='100%';
-    imgEl.style.objectFit='cover';
-    imgEl.style.zIndex='1000';
-    document.body.appendChild(imgEl);
-    const btn=document.createElement('button');
-    btn.textContent="點擊繼續";
-    btn.className='btn';
-    btn.style.position='fixed';
-    btn.style.zIndex='1001';
-    btn.style.top='90%';
-    btn.style.left='50%';
-    btn.style.transform='translateX(-50%)';
-    document.body.appendChild(btn);
-    btn.addEventListener('click',()=>{
-      imgEl.remove();
-      btn.remove();
-      idx++;
-      next();
-    });
+  gameStage.style.display='none';
+  overlay.classList.add('show');
+  let idx=0;
+  storyImg.src=images[idx];
+  storyImg.onclick=function next(){
+    idx++;
+    if(idx>=images.length){
+      overlay.classList.remove('show');
+      gameStage.style.display='flex';
+      storyImg.onclick=null;
+      callback();
+      return;
+    }
+    storyImg.src=images[idx];
   }
-  next();
 }
 
-// 遊戲設定
 function setupRound(){
-  round++; renderRound(); renderLives(); resultBigEl.textContent=''; busy=false; overlay.classList.remove('show');
+  round++; renderRound(); renderLives(); resultBigEl.textContent=''; busy=false;
   currentCorrectDoor=Math.random()<0.5?0:1;
   doors.forEach((dw,idx)=>{
     const img=dw.querySelector('.doorBack img');
-    img.src = (idx===currentCorrectDoor)? correctImages[Math.floor(Math.random()*correctImages.length)]: wrongImage;
+    img.src = "";
     img.style.visibility='hidden';
     dw.classList.remove('opened');
   });
+  // 設定正確圖片
+  doors[currentCorrectDoor].querySelector('.doorBack img').src=correctImages[Math.floor(Math.random()*correctImages.length)];
+  doors[1-currentCorrectDoor].querySelector('.doorBack img').src=wrongImage;
 }
 
-// 點門選擇
 function openDoor(idx){
   if(busy) return;
-  busy=true; overlay.classList.add('show');
+  busy=true;
   const chosen=doors[idx];
+  const other=doors[1-idx];
+  // 隱藏另一門
+  other.querySelector('.doorBack img').style.visibility='hidden';
   chosen.classList.add('opened');
   const img=chosen.querySelector('.doorBack img');
   img.style.visibility='visible';
   const isWrong=img.src.includes(wrongImage);
-
-  if(isWrong){ lives=Math.max(0,lives-1); resultBigEl.textContent='❌'; } 
-  else { resultBigEl.textContent='🤡'; correctCount++; }
-
+  if(isWrong) lives--;
   renderLives();
-
-  setTimeout(()=>{
-    if(lives<=0){
-      resultBigEl.textContent='Game Over';
-      resultBigEl.style.fontSize='80px';
-      resultBigEl.style.color='red';
-      // 生命用光播放洋芋片9 → 2秒後接56
-      showStorySequence([lifeOverImage], ()=>{
-        setTimeout(()=>{ showStorySequence(storyEndImages, ()=>{playAgainBtn.style.display='inline-block'; busy=true;}); },2000);
-      });
-    } else if(round>=maxRounds){
-      resultBigEl.textContent='WIN';
-      resultBigEl.style.fontSize='80px';
-      resultBigEl.style.color='red';
-      overlay.classList.add('show');
-      playAgainBtn.style.display='none'; // 隱藏重置按鈕
-      showStorySequence(storyEndImages, ()=>{
-        overlay.classList.remove('show');
-        busy=true;
-      });
-    } else {
-      busy=false; overlay.classList.remove('show'); setupRound();
-    }
-  },600);
+  resultBigEl.style.fontSize='80px';
+  resultBigEl.style.color='red';
+  if(isWrong){
+    resultBigEl.textContent='Game Over';
+    showStorySequence([...storyLose,...storyWin],()=>{ playAgainBtn.style.display='inline-block'; });
+  } else if(round>=maxRounds){
+    resultBigEl.textContent='WIN';
+    showStorySequence(storyWin,()=>{ playAgainBtn.style.display='inline-block'; });
+  } else{
+    resultBigEl.textContent=isWrong?'❌':'🤡';
+    setTimeout(()=>{
+      busy=false;
+      setupRound();
+    },600);
+  }
 }
 
-// 重置遊戲
-function resetGame(){
-  round=0; correctCount=0; lives=3; playAgainBtn.style.display='none';
-  resultBigEl.textContent=''; resultBigEl.style.fontSize='60px'; resultBigEl.style.color='red';
-  showStorySequence(storyImages, setupRound);
-  overlay.classList.remove('show');
-}
+doors.forEach((d,i)=>d.addEventListener('click',()=>openDoor(i)));
+playAgainBtn.addEventListener('click',()=>location.reload());
+restartBtn.addEventListener('click',()=>location.reload());
 
-// 綁定事件
-doors.forEach((d,i)=> d.addEventListener('click',()=>openDoor(i)));
-playAgainBtn.addEventListener('click',resetGame);
-restartBtn.addEventListener('click',resetGame);
-
-resetGame();
+showStorySequence(storyStart,setupRound);
 </script>
 </body>
 </html>
