@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>猜猜小丑在哪裡</title>
+<style>
+:root{
+  --bg:#bfe8ff;
+  --door:#3aa0ff;
+  --door-front:#2a84d6;
+  --accent:#ff4b6e;
+  --text:#002d5a;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:100vh;
+  user-select:none;
+}
+header{margin-top:18px;text-align:center;}
+h1{margin:0;font-size:28px;letter-spacing:1px;}
+.topRow{
+  width:92%; max-width:980px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:14px;margin-bottom:6px;
+  padding:0 10px;
+}
+#roundNum{
+  font-weight:800;font-size:20px;
+  background: rgba(255,255,255,0.6);
+  padding:6px 12px;
+  border-radius:10px;
+  color:var(--text);
+}
+#lives{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.lifeDot{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 4px 10px rgba(0,0,0,0.15);
+}
+.lifeDot.hidden{opacity:0.15;}
+.stage{
+  width:92%; max-width:980px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:18px;
+  margin-bottom:40px;
+}
+.doors{
+  display:flex;
+  gap:36px;
+  justify-content:center;
+  align-items:flex-start;
+  width:100%;
+}
+.doorWrap{
+  width:520px;
+  height:360px;
+  perspective:1200px;
+  position:relative;
+}
+.doorFront{
+  width:100%;
+  height:100%;
+  border-radius:18px;
+  background:linear-gradient(180deg,var(--door-front),var(--door));
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  transform-origin: top center;
+  transform: rotateX(0deg);
+  transition: transform 1s cubic-bezier(.2,.8,.2,1);
+  box-shadow:0 14px 30px rgba(0,0,0,0.15);
+  position:absolute;
+  top:0; left:0;
+  z-index:5;
+}
+.dotMark{
+  width:60px;height:60px;border-radius:50%;
+  background:var(--accent); display:flex;
+  align-items:center;justify-content:center;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+}
+.doorBack{
+  width:100%; height:100%;
+  border-radius:18px;
+  background:white;
+  overflow:hidden;
+  position:absolute;
+  top:0; left:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
+}
+.doorBack img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  padding:8px;
+  visibility: hidden;
+}
+.opened .doorFront{ transform: rotateX(-180deg); }
+#resultBig{
+  margin-top:6px;
+  font-size:60px;
+  font-weight:900;
+  color:red;
+  text-align:center;
+  position:relative;
+}
+.firework{
+  position:absolute;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#ff0044;
+  animation: fireAnim 1s ease-out infinite;
+}
+@keyframes fireAnim{
+  0%{transform:translate(0,0); opacity:1;}
+  100%{transform:translate(var(--dx,0px),var(--dy,0px)); opacity:0;}
+}
+#controls{ margin-top:14px; display:flex; gap:12px; align-items:center; }
+.btn{
+  padding:10px 14px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.9);
+  border:1px solid rgba(0,0,0,0.06);
+  font-weight:800;
+  cursor:pointer;
+}
+.overlay{
+  position:fixed;left:0;top:0;right:0;bottom:0;
+  z-index:999; display:none;
+}
+.overlay.show{ display:block; }
+@media(max-width:860px){
+  .doorWrap{ width:86vw; height:50vw; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>猜猜小丑在哪裡</h1>
+</header>
+<div class="topRow">
+  <div id="roundNum">0</div>
+  <div id="lives"></div>
+</div>
+<section class="stage">
+  <div class="doors">
+    <div class="doorWrap" id="door0">
+      <div class="doorBack"><img src="" alt="" /></div>
+      <div class="doorFront"><div class="dotMark"></div></div>
+    </div>
+    <div class="doorWrap" id="door1">
+      <div class="doorBack"><img src="" alt="" /></div>
+      <div class="doorFront"><div class="dotMark"></div></div>
+    </div>
+  </div>
+  <div id="resultBig"></div>
+  <div id="controls">
+    <button class="btn" id="playAgain" style="display:none">再玩一次</button>
+    <button class="btn" id="restartBtn">重置遊戲</button>
+  </div>
+</section>
+<div class="overlay" id="overlay"></div>
+<script>
+const correctImages = [
+    "1.png","1000018658.jpeg","1000018659.jpeg","2.png","3.png",
+    "4 (2).png","4.png","5.png","546175134_1138063744950693_180659281319095751_n.jpg",
+    "Am I (1).jpg","Am I (2).jpg","Am I (3).jpg","Am I (4).jpg","Am I.jpg",
+    "I am joker. (1).jpg","I am joker. (2).jpg","I am joker. (3).jpg",
+    "I am joker. 的複本 (1).jpg","I am joker..jpg","I am joker..png",
+    "IMG_20250806_193336_118.jpg","IMG_20251001_224237_440.jpg","IMG_20251118_213550_407.jpg",
+    "unnamed (1).webp","unnamed (2).webp","unnamed (4).webp","unnamed.webp",
+    "未命名設計.jpg","未命名設計.png"
+];
+const wrongImage = "Ri86b7h.jpg";
+
+const maxRounds = 6;
+let round = 0, correctCount = 0, lives=3, busy=false;
+const doors = [document.getElementById('door0'),document.getElementById('door1')];
+const roundNumEl = document.getElementById('roundNum');
+const livesEl = document.getElementById('lives');
+const resultBigEl = document.getElementById('resultBig');
+const playAgainBtn = document.getElementById('playAgain');
+const restartBtn = document.getElementById('restartBtn');
+const overlay = document.getElementById('overlay');
+
+function renderLives(){
+  livesEl.innerHTML='';
+  for(let i=0;i<lives;i++){ const d=document.createElement('div'); d.className='lifeDot'; livesEl.appendChild(d);}
+  for(let i=lives;i<3;i++){ const d=document.createElement('div'); d.className='lifeDot hidden'; livesEl.appendChild(d);}
+}
+function renderRound(){ roundNumEl.textContent=round; }
+
+let currentCorrectDoor=0;
+function setupRound(){
+  round++; renderRound(); renderLives(); resultBigEl.textContent=''; busy=false; overlay.classList.remove('show');
+  currentCorrectDoor=Math.random()<0.5?0:1;
+  doors.forEach((dw,idx)=>{
+    const img=dw.querySelector('.doorBack img');
+    img.src = (idx===currentCorrectDoor)? correctImages[Math.floor(Math.random()*correctImages.length)]: wrongImage;
+    img.style.visibility='hidden';
+    dw.classList.remove('opened');
+  });
+}
+
+function openDoor(idx){
+  if(busy) return;
+  busy=true; overlay.classList.add('show');
+  const chosen=doors[idx];
+  chosen.classList.add('opened');
+  const img=chosen.querySelector('.doorBack img');
+  img.style.visibility='visible';
+  const isWrong=img.src.includes(wrongImage);
+
+  if(isWrong){ lives=Math.max(0,lives-1); resultBigEl.textContent='❌'; } 
+  else { resultBigEl.textContent='🤡'; correctCount++; }
+
+  renderLives();
+
+  setTimeout(()=>{
+    if(lives<=0){ 
+      resultBigEl.textContent='Game Over';
+      resultBigEl.style.fontSize='80px';
+      resultBigEl.style.color='red';
+      playAgainBtn.style.display='inline-block';
+      overlay.classList.remove('show');
+      busy=true;
+    } else if(round>=maxRounds){ 
+      resultBigEl.textContent='WIN';
+      resultBigEl.style.fontSize='80px';
+      resultBigEl.style.color='red';
+      createFireworks();
+      playAgainBtn.style.display='inline-block';
+      overlay.classList.remove('show');
+      busy=true;
+    } else {
+      busy=false; overlay.classList.remove('show'); setupRound();
+    }
+  },600);
+}
+
+function resetGame(){
+  round=0; correctCount=0; lives=3; playAgainBtn.style.display='none';
+  resultBigEl.textContent=''; resultBigEl.style.fontSize='60px'; resultBigEl.style.color='red';
+  setupRound();
+  overlay.classList.remove('show');
+}
+
+doors.forEach((d,i)=> d.addEventListener('click',()=>openDoor(i)));
+playAgainBtn.addEventListener('click',resetGame);
+restartBtn.addEventListener('click',resetGame);
+
+function createFireworks(){
+  for(let i=0;i<30;i++){
+    const f=document.createElement('div');
+    f.className='firework';
+    f.style.setProperty('--dx',(Math.random()*600-300)+'px');
+    f.style.setProperty('--dy',(-Math.random()*400)+'px');
+    f.style.background=['#ff0044','#ffcc00','#00ffcc'][Math.floor(Math.random()*3)];
+    resultBigEl.appendChild(f);
+    setTimeout(()=>{ f.remove(); },1000);
+  }
+}
+
+resetGame();
+</script>
+</body>
+</html>
