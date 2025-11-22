@@ -31,9 +31,11 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 }
 .topLeft{
   position:absolute; top:10px; left:10px; font-weight:800; font-size:20px; background: rgba(255,255,255,0.6); padding:6px 12px; border-radius:10px;
+  display:none;
 }
 .topRight{
   position:absolute; top:10px; right:10px; display:flex; gap:8px; align-items:center;
+  display:none;
 }
 .lifeDot{width:28px;height:28px;border-radius:50%;background:var(--accent);box-shadow:0 4px 10px rgba(0,0,0,0.15);}
 .lifeDot.hidden{opacity:0.15;}
@@ -42,6 +44,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   display:flex; flex-direction:column;
   align-items:center; gap:18px;
   margin-bottom:40px;
+  display:none;
 }
 .doors{
   display:flex; gap:36px;
@@ -101,25 +104,14 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   text-align:center;
   position:relative;
 }
-#controls{ margin-top:14px; display:flex; gap:12px; align-items:center; }
-.btn{
-  padding:10px 14px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.9);
-  border:1px solid rgba(0,0,0,0.06);
-  font-weight:800;
-  cursor:pointer;
-}
 .overlay{
   position:fixed;left:0;top:0;right:0;bottom:0;
-  z-index:999; display:none;
-  background:rgba(255,255,255,0.9);
-  display:flex; justify-content:center; align-items:center;
+  z-index:999; display:flex; justify-content:center; align-items:center;
+  background:rgba(255,255,255,0.95);
 }
 .overlay img{
   max-width:100%; max-height:100%;
 }
-.overlay.show{ display:flex; }
 @media(max-width:860px){
   .doorWrap{ width:86vw; height:50vw; }
 }
@@ -143,24 +135,17 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
     </div>
   </div>
   <div id="resultBig"></div>
-  <div id="controls">
-    <button class="btn" id="playAgain" style="display:none">再玩一次</button>
-    <button class="btn" id="restartBtn">重置遊戲</button>
-  </div>
 </section>
 <div class="overlay" id="overlay"><img src="" id="storyImg"></div>
 <script>
-const storyStart = [
+const storyImages = [
   "story/洋芋片1.jpg",
   "story/洋芋片2.jpg",
   "story/洋芋片3.jpg",
-  "story/洋芋片4.jpg"
+  "story/洋芋片4.jpg",
+  "story/洋芋片7.jpg",
+  "story/洋芋片8.jpg"
 ];
-const storyWin = [
-  "story/洋芋片5.jpg",
-  "story/洋芋片6.jpg"
-];
-const storyLose = ["story/洋芋片9.jpg"];
 
 const correctImages = [
 "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png","joker/3.png",
@@ -181,11 +166,11 @@ const doors=[document.getElementById('door0'),document.getElementById('door1')];
 const roundNumEl=document.getElementById('roundNum');
 const livesEl=document.getElementById('lives');
 const resultBigEl=document.getElementById('resultBig');
-const playAgainBtn=document.getElementById('playAgain');
-const restartBtn=document.getElementById('restartBtn');
 const overlay=document.getElementById('overlay');
 const storyImg=document.getElementById('storyImg');
 const gameStage=document.getElementById('gameStage');
+const topLeft=document.getElementById('roundNum');
+const topRight=document.getElementById('lives');
 
 function renderLives(){
   livesEl.innerHTML='';
@@ -197,19 +182,24 @@ function renderRound(){ roundNumEl.textContent=round; }
 function showStorySequence(images, callback){
   gameStage.style.display='none';
   overlay.classList.add('show');
+  topLeft.style.display='none';
+  topRight.style.display='none';
   let idx=0;
   storyImg.src=images[idx];
-  storyImg.onclick=function next(){
+  function nextStory(){
     idx++;
     if(idx>=images.length){
       overlay.classList.remove('show');
       gameStage.style.display='flex';
+      topLeft.style.display='block';
+      topRight.style.display='flex';
       storyImg.onclick=null;
       callback();
       return;
     }
     storyImg.src=images[idx];
   }
+  storyImg.onclick=nextStory;
 }
 
 function setupRound(){
@@ -221,7 +211,6 @@ function setupRound(){
     img.style.visibility='hidden';
     dw.classList.remove('opened');
   });
-  // 設定正確圖片
   doors[currentCorrectDoor].querySelector('.doorBack img').src=correctImages[Math.floor(Math.random()*correctImages.length)];
   doors[1-currentCorrectDoor].querySelector('.doorBack img').src=wrongImage;
 }
@@ -231,7 +220,6 @@ function openDoor(idx){
   busy=true;
   const chosen=doors[idx];
   const other=doors[1-idx];
-  // 隱藏另一門
   other.querySelector('.doorBack img').style.visibility='hidden';
   chosen.classList.add('opened');
   const img=chosen.querySelector('.doorBack img');
@@ -243,10 +231,8 @@ function openDoor(idx){
   resultBigEl.style.color='red';
   if(isWrong){
     resultBigEl.textContent='Game Over';
-    showStorySequence([...storyLose,...storyWin],()=>{ playAgainBtn.style.display='inline-block'; });
   } else if(round>=maxRounds){
     resultBigEl.textContent='WIN';
-    showStorySequence(storyWin,()=>{ playAgainBtn.style.display='inline-block'; });
   } else{
     resultBigEl.textContent=isWrong?'❌':'🤡';
     setTimeout(()=>{
@@ -256,11 +242,11 @@ function openDoor(idx){
   }
 }
 
+// 綁定遊戲門事件
 doors.forEach((d,i)=>d.addEventListener('click',()=>openDoor(i)));
-playAgainBtn.addEventListener('click',()=>location.reload());
-restartBtn.addEventListener('click',()=>location.reload());
 
-showStorySequence(storyStart,setupRound);
+// 播放開頭故事
+showStorySequence(storyImages,setupRound);
 </script>
 </body>
 </html>
