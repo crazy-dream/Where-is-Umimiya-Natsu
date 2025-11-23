@@ -48,7 +48,6 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   justify-content:center;
   align-items:flex-start;
   width:100%;
-  margin-top: 50px; /* 往下移门 */
 }
 .doorWrap{
   width:520px;
@@ -93,14 +92,6 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   padding:8px;
   visibility: hidden;
 }
-.resultBelow{
-  position: absolute;
-  bottom: -80px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 60px;
-  display: none;
-}
 .opened .doorFront{ transform: rotateX(-180deg); }
 
 /* 故事畫面 - 全螢幕 */
@@ -126,7 +117,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   right:20px;
   top:50%;
   transform:translateY(-50%);
-  color:white; /* 改为白色 */
+  color:black;
   background:none;
   padding:0;
   font-size:16px;
@@ -140,7 +131,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 #endingScreen{
   position:fixed;
   left:0;top:0;right:0;bottom:0;
-  background: var(--bg); /* 改为蓝色背景 */
+  background:rgba(255,255,255,0.96);
   display:none;
   z-index:2000;
   justify-content:center;
@@ -173,12 +164,10 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
     <div class="doorWrap" id="door0">
       <div class="doorBack"><img src="" alt="" /></div>
       <div class="doorFront"><div class="dotMark"></div></div>
-      <div class="resultBelow"></div>
     </div>
     <div class="doorWrap" id="door1">
       <div class="doorBack"><img src="" alt="" /></div>
       <div class="doorFront"><div class="dotMark"></div></div>
-      <div class="resultBelow"></div>
     </div>
   </div>
 </section>
@@ -211,7 +200,7 @@ const correctImages = [
 "joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440.jpg","joker/IMG_20251118_213550_407.jpg",
 "joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp","joker/unnamed.webp",
 "joker/未命名設計.jpg","joker/未命名設計.png"];
-const wrongImage="Ri86b7h.jpg"; // 错误门显示 Ri86b7h.jpg
+const wrongImage="wrong/Ri86b7h.jpg";
 
 const maxRounds=6;
 let round=0, lives=3, busy=false, currentCorrectDoor=0;
@@ -240,12 +229,6 @@ function showStorySequence(images, callback){
 
   let idx=0;
   storyImg.src=images[idx];
-  // 根据图片索引设置提示文本
-  if (images === storyStart || images === storyLose || (images === storyWin && idx < 1)) {
-    tapHint.textContent = '點擊任意地方繼續';
-  } else if (images === storyWin && idx === 1) {
-    tapHint.textContent = '點擊任意地方在一次';
-  }
 
   overlay.onclick=function(){
     idx++;
@@ -258,12 +241,6 @@ function showStorySequence(images, callback){
       return;
     }
     storyImg.src=images[idx];
-    // 更新提示文本
-    if (images === storyStart || images === storyLose || (images === storyWin && idx < 1)) {
-      tapHint.textContent = '點擊任意地方繼續';
-    } else if (images === storyWin && idx === 1) {
-      tapHint.textContent = '點擊任意地方在一次';
-    }
   }
 }
 
@@ -284,17 +261,12 @@ function setupRound(){
   currentCorrectDoor=Math.random()<0.5?0:1;
   doors.forEach(dw=>{
     const img=dw.querySelector('.doorBack img');
-    const resultBelow=dw.querySelector('.resultBelow');
     img.src="";
     img.style.visibility='hidden';
-    resultBelow.style.display='none';
-    resultBelow.textContent = '';
     dw.classList.remove('opened');
   });
-  // 正确门显示小丑图片
   doors[currentCorrectDoor].querySelector('.doorBack img').src=
     correctImages[Math.floor(Math.random()*correctImages.length)];
-  // 错误门显示 Ri86b7h.jpg
   doors[1-currentCorrectDoor].querySelector('.doorBack img').src=wrongImage;
 }
 
@@ -303,19 +275,10 @@ function openDoor(idx){
   busy=true;
   const chosen=doors[idx];
   const img=chosen.querySelector('.doorBack img');
-  const resultBelow=chosen.querySelector('.resultBelow');
   chosen.classList.add('opened');
-  img.style.visibility='visible'; // 显示门里面的图片
+  img.style.visibility='visible';
 
-  // 在门下面显示图案
-  if (idx === currentCorrectDoor) {
-    resultBelow.textContent = '🤡'; // 小丑图案
-  } else {
-    resultBelow.textContent = '❌'; // 叉叉
-  }
-  resultBelow.style.display='block';
-
-  const isWrong=idx !== currentCorrectDoor;
+  const isWrong=img.src.includes(wrongImage);
   if(isWrong) lives--;
   renderLives();
 
