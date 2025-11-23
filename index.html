@@ -93,8 +93,12 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   padding:8px;
   visibility: hidden;
 }
-.doorBack .resultText{
-  font-size: 120px;
+.resultBelow{
+  position: absolute;
+  bottom: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 60px;
   display: none;
 }
 .opened .doorFront{ transform: rotateX(-180deg); }
@@ -167,12 +171,14 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 <section class="stage" id="gameStage">
   <div class="doors">
     <div class="doorWrap" id="door0">
-      <div class="doorBack"><img src="" alt="" /><div class="resultText"></div></div>
+      <div class="doorBack"><img src="" alt="" /></div>
       <div class="doorFront"><div class="dotMark"></div></div>
+      <div class="resultBelow"></div>
     </div>
     <div class="doorWrap" id="door1">
-      <div class="doorBack"><img src="" alt="" /><div class="resultText"></div></div>
+      <div class="doorBack"><img src="" alt="" /></div>
       <div class="doorFront"><div class="dotMark"></div></div>
+      <div class="resultBelow"></div>
     </div>
   </div>
 </section>
@@ -205,7 +211,7 @@ const correctImages = [
 "joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440.jpg","joker/IMG_20251118_213550_407.jpg",
 "joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp","joker/unnamed.webp",
 "joker/未命名設計.jpg","joker/未命名設計.png"];
-const wrongImage="Ri86b7h.jpg"; // 改为 Ri86b7h.jpg
+const wrongImage="Ri86b7h.jpg"; // 错误门显示 Ri86b7h.jpg
 
 const maxRounds=6;
 let round=0, lives=3, busy=false, currentCorrectDoor=0;
@@ -278,17 +284,18 @@ function setupRound(){
   currentCorrectDoor=Math.random()<0.5?0:1;
   doors.forEach(dw=>{
     const img=dw.querySelector('.doorBack img');
-    const resultText=dw.querySelector('.doorBack .resultText');
+    const resultBelow=dw.querySelector('.resultBelow');
     img.src="";
     img.style.visibility='hidden';
-    resultText.style.display='none';
+    resultBelow.style.display='none';
+    resultBelow.textContent = '';
     dw.classList.remove('opened');
   });
-  // 正确门显示小丑图片（但根据要求，改为emo？这里保留图片，但可以改为文本）
+  // 正确门显示小丑图片
   doors[currentCorrectDoor].querySelector('.doorBack img').src=
     correctImages[Math.floor(Math.random()*correctImages.length)];
-  // 错误门显示叉叉（文本）
-  doors[1-currentCorrectDoor].querySelector('.doorBack .resultText').textContent = '❌';
+  // 错误门显示 Ri86b7h.jpg
+  doors[1-currentCorrectDoor].querySelector('.doorBack img').src=wrongImage;
 }
 
 function openDoor(idx){
@@ -296,15 +303,17 @@ function openDoor(idx){
   busy=true;
   const chosen=doors[idx];
   const img=chosen.querySelector('.doorBack img');
-  const resultText=chosen.querySelector('.doorBack .resultText');
+  const resultBelow=chosen.querySelector('.resultBelow');
   chosen.classList.add('opened');
+  img.style.visibility='visible'; // 显示门里面的图片
+
+  // 在门下面显示图案
   if (idx === currentCorrectDoor) {
-    img.style.visibility='visible'; // 显示小丑图片
-    resultText.style.display='none';
+    resultBelow.textContent = '🤡'; // 小丑图案
   } else {
-    img.style.visibility='hidden';
-    resultText.style.display='block'; // 显示叉叉
+    resultBelow.textContent = '❌'; // 叉叉
   }
+  resultBelow.style.display='block';
 
   const isWrong=idx !== currentCorrectDoor;
   if(isWrong) lives--;
