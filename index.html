@@ -94,7 +94,6 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 }
 .opened .doorFront{ transform: rotateX(-180deg); }
 
-/* 故事畫面 - 全螢幕 */
 .overlay{
   position:fixed;left:0;top:0;right:0;bottom:0;
   background:rgba(255,255,255,0.97);
@@ -121,7 +120,6 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   font-weight:700;
 }
 
-/* ★新增：結算超大字幕 */
 #endingScreen{
   position:fixed;
   left:0;top:0;right:0;bottom:0;
@@ -162,21 +160,17 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   </div>
 </section>
 
-<!-- 故事全螢幕 -->
 <div class="overlay" id="overlay">
   <img src="" id="storyImg">
   <div class="tapHint">點擊任意位置繼續</div>
 </div>
 
-<!-- ★新增：結算大字幕 -->
 <div id="endingScreen">
   <div id="endingText"></div>
 </div>
 
 <script>
-/* --------------------
-   故事素材
--------------------- */
+
 const storyStart = [
   "story/洋芋片1.jpg",
   "story/洋芋片2.jpg",
@@ -188,9 +182,7 @@ const storyStart = [
 const storyWin = ["story/洋芋片8.jpg","story/洋芋片9.jpg"];
 const storyLose = ["story/洋芋片7.jpg","story/洋芋片8.jpg","story/洋芋片9.jpg"];
 
-/* --------------------
-   圖片資料
--------------------- */
+
 const correctImages = [
 "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png","joker/3.png",
 "joker/4 (2).png","joker/4.png","joker/5.png","joker/546175134_1138063744950693_180659281319095751_n.jpg",
@@ -200,13 +192,13 @@ const correctImages = [
 "joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440.jpg","joker/IMG_20251118_213550_407.jpg",
 "joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp","joker/unnamed.webp",
 "joker/未命名設計.jpg","joker/未命名設計.png"];
-const wrongImage="wrong/Ri86b7h.jpg";
+const wrongImage="Ri86b7h.jpg";
 
 const maxRounds=6;
 let round=0, lives=3, busy=false;
 let currentCorrectDoor=0;
 
-/* DOM */
+
 const doors=[document.getElementById('door0'),document.getElementById('door1')];
 const roundNumEl=document.getElementById('roundNum');
 const livesEl=document.getElementById('lives');
@@ -216,9 +208,7 @@ const gameStage=document.getElementById('gameStage');
 const endingScreen=document.getElementById('endingScreen');
 const endingText=document.getElementById('endingText');
 
-/* --------------------
-   顯示血量
--------------------- */
+
 function renderLives(){
   livesEl.innerHTML='';
   for(let i=0;i<lives;i++){
@@ -234,9 +224,7 @@ function renderLives(){
 }
 function renderRound(){ roundNumEl.textContent=round; }
 
-/* --------------------
-   顯示故事
--------------------- */
+
 function showStorySequence(images, callback){
   gameStage.style.display='none';
   overlay.classList.add('show');
@@ -257,9 +245,7 @@ function showStorySequence(images, callback){
   }
 }
 
-/* --------------------
-   顯示大結算字（先）
--------------------- */
+
 function showEnding(text, after){
   endingText.textContent=text;
   endingScreen.classList.add('show');
@@ -271,9 +257,7 @@ function showEnding(text, after){
   }
 }
 
-/* --------------------
-   回合
--------------------- */
+
 doors.forEach((d,i)=>d.addEventListener('click',()=>openDoor(i)));
 
 function setupRound(){
@@ -318,7 +302,7 @@ function openDoor(idx){
     return;
   }
 
-  /* Win */
+
   if(!isWrong && round>=maxRounds){
     showEnding("WIN",()=>{
       showStorySequence(storyWin,()=>{
@@ -329,11 +313,10 @@ function openDoor(idx){
     return;
   }
 
-  /* 下一回合 */
   setTimeout(()=>{ busy=false; setupRound(); },600);
 }
 
-/* 開始遊戲 */
+
 showStorySequence(storyStart,setupRound);
 </script>
 </body>
