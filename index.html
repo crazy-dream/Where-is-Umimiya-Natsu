@@ -101,17 +101,22 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   text-align:center;
   position:relative;
 }
+
+/* ★★★ 修正覆蓋問題 ★★★ */
 .overlay{
   position:fixed;left:0;top:0;right:0;bottom:0;
-  z-index:999; display:none;
+  z-index:999;
+  display:none;
   background:rgba(255,255,255,0.9);
-  display:flex; justify-content:center; align-items:center;
+  justify-content:center; 
+  align-items:center;
   cursor:pointer;
 }
 .overlay img{
   max-width:100%; max-height:100%;
 }
 .overlay.show{ display:flex; }
+
 @media(max-width:860px){
   .doorWrap{ width:86vw; height:50vw; }
 }
@@ -158,7 +163,7 @@ const correctImages = [
 "joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440.jpg","joker/IMG_20251118_213550_407.jpg",
 "joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp","joker/unnamed.webp",
 "joker/未命名設計.jpg","joker/未命名設計.png"];
-const wrongImage = "Ri86b7h.jpg";
+const wrongImage = "wrong/Ri86b7h.jpg";
 
 const maxRounds = 6;
 let round=0, lives=3, busy=false;
@@ -206,7 +211,6 @@ function setupRound(){
     img.style.visibility='hidden';
     dw.classList.remove('opened');
   });
-  // 設定正確圖片
   doors[currentCorrectDoor].querySelector('.doorBack img').src=correctImages[Math.floor(Math.random()*correctImages.length)];
   doors[1-currentCorrectDoor].querySelector('.doorBack img').src=wrongImage;
 }
@@ -228,7 +232,6 @@ function openDoor(idx){
   if(isWrong && lives<=0){
     resultBigEl.textContent='Game Over';
     showStorySequence(storyLose,()=>{
-      // 結束後重啟遊戲
       setTimeout(() => {
         round=0; lives=3;
         showStorySequence(storyStart, setupRound);
@@ -237,7 +240,6 @@ function openDoor(idx){
   } else if(!isWrong && round>=maxRounds){
     resultBigEl.textContent='WIN';
     showStorySequence(storyWin,()=>{
-      // 結束後重啟遊戲
       setTimeout(() => {
         round=0; lives=3;
         showStorySequence(storyStart, setupRound);
