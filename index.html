@@ -102,20 +102,40 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   position:relative;
 }
 
-/* ★★★ 修正覆蓋問題 ★★★ */
+/* --------------------
+   修正故事畫面
+-------------------- */
 .overlay{
   position:fixed;left:0;top:0;right:0;bottom:0;
-  z-index:999;
+  background:rgba(255,255,255,0.97);
   display:none;
-  background:rgba(255,255,255,0.9);
+  z-index:999;
   justify-content:center; 
   align-items:center;
   cursor:pointer;
 }
+
+/* 全螢幕鋪滿 */
 .overlay img{
-  max-width:100%; max-height:100%;
+  width:100vw;
+  height:100vh;
+  object-fit:cover;
 }
+
+/* 顯示狀態 */
 .overlay.show{ display:flex; }
+
+/* 點擊繼續文字 */
+.tapHint{
+  position:absolute;
+  bottom:30px;
+  color:black;
+  background:rgba(255,255,255,0.7);
+  padding:10px 20px;
+  border-radius:8px;
+  font-size:22px;
+  font-weight:700;
+}
 
 @media(max-width:860px){
   .doorWrap{ width:86vw; height:50vw; }
@@ -141,8 +161,17 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   </div>
   <div id="resultBig"></div>
 </section>
-<div class="overlay" id="overlay"><img src="" id="storyImg"></div>
+
+<!-- 故事全螢幕 -->
+<div class="overlay" id="overlay">
+  <img src="" id="storyImg">
+  <div class="tapHint">點擊任意位置繼續</div>
+</div>
+
 <script>
+/* --------------------
+   故事素材
+-------------------- */
 const storyStart = [
   "story/洋芋片1.jpg",
   "story/洋芋片2.jpg",
@@ -154,6 +183,9 @@ const storyStart = [
 const storyWin = ["story/洋芋片8.jpg","story/洋芋片9.jpg"];
 const storyLose = ["story/洋芋片7.jpg","story/洋芋片8.jpg","story/洋芋片9.jpg"];
 
+/* --------------------
+   資料
+-------------------- */
 const correctImages = [
 "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png","joker/3.png",
 "joker/4 (2).png","joker/4.png","joker/5.png","joker/546175134_1138063744950693_180659281319095751_n.jpg",
@@ -169,6 +201,9 @@ const maxRounds = 6;
 let round=0, lives=3, busy=false;
 let currentCorrectDoor=0;
 
+/* --------------------
+   DOM
+-------------------- */
 const doors=[document.getElementById('door0'),document.getElementById('door1')];
 const roundNumEl=document.getElementById('roundNum');
 const livesEl=document.getElementById('lives');
@@ -177,6 +212,9 @@ const overlay=document.getElementById('overlay');
 const storyImg=document.getElementById('storyImg');
 const gameStage=document.getElementById('gameStage');
 
+/* --------------------
+   UI
+-------------------- */
 function renderLives(){
   livesEl.innerHTML='';
   for(let i=0;i<lives;i++){ const d=document.createElement('div'); d.className='lifeDot'; livesEl.appendChild(d);}
@@ -184,17 +222,22 @@ function renderLives(){
 }
 function renderRound(){ roundNumEl.textContent=round; }
 
+/* --------------------
+   顯示故事（已完整修正）
+-------------------- */
 function showStorySequence(images, callback){
   gameStage.style.display='none';
   overlay.classList.add('show');
+
   let idx=0;
   storyImg.src=images[idx];
-  storyImg.onclick=function next(){
+
+  overlay.onclick=function(){
     idx++;
     if(idx>=images.length){
       overlay.classList.remove('show');
+      overlay.onclick=null;
       gameStage.style.display='flex';
-      storyImg.onclick=null;
       callback();
       return;
     }
@@ -202,15 +245,21 @@ function showStorySequence(images, callback){
   }
 }
 
+/* --------------------
+   遊戲流程
+-------------------- */
 function setupRound(){
   round++; renderRound(); renderLives(); resultBigEl.textContent=''; busy=false;
+
   currentCorrectDoor=Math.random()<0.5?0:1;
-  doors.forEach((dw,idx)=>{
+
+  doors.forEach((dw)=>{
     const img=dw.querySelector('.doorBack img');
     img.src = "";
     img.style.visibility='hidden';
     dw.classList.remove('opened');
   });
+
   doors[currentCorrectDoor].querySelector('.doorBack img').src=correctImages[Math.floor(Math.random()*correctImages.length)];
   doors[1-currentCorrectDoor].querySelector('.doorBack img').src=wrongImage;
 }
@@ -218,24 +267,28 @@ function setupRound(){
 function openDoor(idx){
   if(busy) return;
   busy=true;
+
   const chosen=doors[idx];
   const other=doors[1-idx];
+
   other.querySelector('.doorBack img').style.visibility='hidden';
   chosen.classList.add('opened');
   const img=chosen.querySelector('.doorBack img');
   img.style.visibility='visible';
+
   const isWrong=img.src.includes(wrongImage);
   if(isWrong) lives--;
   renderLives();
   resultBigEl.style.fontSize='80px';
   resultBigEl.style.color='red';
+
   if(isWrong && lives<=0){
     resultBigEl.textContent='Game Over';
     showStorySequence(storyLose,()=>{
       setTimeout(() => {
         round=0; lives=3;
         showStorySequence(storyStart, setupRound);
-      }, 1000);
+      }, 800);
     });
   } else if(!isWrong && round>=maxRounds){
     resultBigEl.textContent='WIN';
@@ -243,7 +296,7 @@ function openDoor(idx){
       setTimeout(() => {
         round=0; lives=3;
         showStorySequence(storyStart, setupRound);
-      }, 1000);
+      }, 800);
     });
   } else{
     resultBigEl.textContent=isWrong?'❌':'🤡';
@@ -253,6 +306,7 @@ function openDoor(idx){
 
 doors.forEach((d,i)=>d.addEventListener('click',()=>openDoor(i)));
 
+/* 開始遊戲 */
 showStorySequence(storyStart,setupRound);
 </script>
 </body>
