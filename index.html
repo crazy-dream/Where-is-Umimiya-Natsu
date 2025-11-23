@@ -93,18 +93,8 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   visibility: hidden;
 }
 .opened .doorFront{ transform: rotateX(-180deg); }
-#resultBig{
-  margin-top:6px;
-  font-size:60px;
-  font-weight:900;
-  color:red;
-  text-align:center;
-  position:relative;
-}
 
-/* --------------------
-   修正故事畫面
--------------------- */
+/* 故事畫面 - 全螢幕 */
 .overlay{
   position:fixed;left:0;top:0;right:0;bottom:0;
   background:rgba(255,255,255,0.97);
@@ -114,18 +104,12 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   align-items:center;
   cursor:pointer;
 }
-
-/* 全螢幕鋪滿 */
 .overlay img{
   width:100vw;
   height:100vh;
   object-fit:cover;
 }
-
-/* 顯示狀態 */
 .overlay.show{ display:flex; }
-
-/* 點擊繼續文字 */
 .tapHint{
   position:absolute;
   bottom:30px;
@@ -137,8 +121,25 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   font-weight:700;
 }
 
-@media(max-width:860px){
-  .doorWrap{ width:86vw; height:50vw; }
+/* ★新增：結算超大字幕 */
+#endingScreen{
+  position:fixed;
+  left:0;top:0;right:0;bottom:0;
+  background:rgba(255,255,255,0.96);
+  display:none;
+  z-index:2000;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+}
+#endingScreen.show{
+  display:flex;
+}
+#endingText{
+  font-size:110px;
+  font-weight:900;
+  color:red;
+  text-shadow:0 0 12px rgba(0,0,0,0.5);
 }
 </style>
 </head>
@@ -159,13 +160,17 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
       <div class="doorFront"><div class="dotMark"></div></div>
     </div>
   </div>
-  <div id="resultBig"></div>
 </section>
 
 <!-- 故事全螢幕 -->
 <div class="overlay" id="overlay">
   <img src="" id="storyImg">
   <div class="tapHint">點擊任意位置繼續</div>
+</div>
+
+<!-- ★新增：結算大字幕 -->
+<div id="endingScreen">
+  <div id="endingText"></div>
 </div>
 
 <script>
@@ -184,7 +189,7 @@ const storyWin = ["story/洋芋片8.jpg","story/洋芋片9.jpg"];
 const storyLose = ["story/洋芋片7.jpg","story/洋芋片8.jpg","story/洋芋片9.jpg"];
 
 /* --------------------
-   資料
+   圖片資料
 -------------------- */
 const correctImages = [
 "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png","joker/3.png",
@@ -195,35 +200,42 @@ const correctImages = [
 "joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440.jpg","joker/IMG_20251118_213550_407.jpg",
 "joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp","joker/unnamed.webp",
 "joker/未命名設計.jpg","joker/未命名設計.png"];
-const wrongImage = "wrong/Ri86b7h.jpg";
+const wrongImage="wrong/Ri86b7h.jpg";
 
-const maxRounds = 6;
+const maxRounds=6;
 let round=0, lives=3, busy=false;
 let currentCorrectDoor=0;
 
-/* --------------------
-   DOM
--------------------- */
+/* DOM */
 const doors=[document.getElementById('door0'),document.getElementById('door1')];
 const roundNumEl=document.getElementById('roundNum');
 const livesEl=document.getElementById('lives');
-const resultBigEl=document.getElementById('resultBig');
 const overlay=document.getElementById('overlay');
 const storyImg=document.getElementById('storyImg');
 const gameStage=document.getElementById('gameStage');
+const endingScreen=document.getElementById('endingScreen');
+const endingText=document.getElementById('endingText');
 
 /* --------------------
-   UI
+   顯示血量
 -------------------- */
 function renderLives(){
   livesEl.innerHTML='';
-  for(let i=0;i<lives;i++){ const d=document.createElement('div'); d.className='lifeDot'; livesEl.appendChild(d);}
-  for(let i=lives;i<3;i++){ const d=document.createElement('div'); d.className='lifeDot hidden'; livesEl.appendChild(d);}
+  for(let i=0;i<lives;i++){
+    const d=document.createElement('div');
+    d.className='lifeDot';
+    livesEl.appendChild(d);
+  }
+  for(let i=lives;i<3;i++){
+    const d=document.createElement('div');
+    d.className='lifeDot hidden';
+    livesEl.appendChild(d);
+  }
 }
 function renderRound(){ roundNumEl.textContent=round; }
 
 /* --------------------
-   顯示故事（已完整修正）
+   顯示故事
 -------------------- */
 function showStorySequence(images, callback){
   gameStage.style.display='none';
@@ -246,65 +258,80 @@ function showStorySequence(images, callback){
 }
 
 /* --------------------
-   遊戲流程
+   顯示大結算字（先）
 -------------------- */
+function showEnding(text, after){
+  endingText.textContent=text;
+  endingScreen.classList.add('show');
+
+  endingScreen.onclick=function(){
+    endingScreen.onclick=null;
+    endingScreen.classList.remove('show');
+    after();
+  }
+}
+
+/* --------------------
+   回合
+-------------------- */
+doors.forEach((d,i)=>d.addEventListener('click',()=>openDoor(i)));
+
 function setupRound(){
-  round++; renderRound(); renderLives(); resultBigEl.textContent=''; busy=false;
+  round++; renderRound(); renderLives(); busy=false;
 
   currentCorrectDoor=Math.random()<0.5?0:1;
 
   doors.forEach((dw)=>{
     const img=dw.querySelector('.doorBack img');
-    img.src = "";
+    img.src="";
     img.style.visibility='hidden';
     dw.classList.remove('opened');
   });
 
-  doors[currentCorrectDoor].querySelector('.doorBack img').src=correctImages[Math.floor(Math.random()*correctImages.length)];
+  doors[currentCorrectDoor].querySelector('.doorBack img').src=
+    correctImages[Math.floor(Math.random()*correctImages.length)];
   doors[1-currentCorrectDoor].querySelector('.doorBack img').src=wrongImage;
 }
 
 function openDoor(idx){
-  if(busy) return;
+  if(busy)return;
   busy=true;
 
   const chosen=doors[idx];
-  const other=doors[1-idx];
-
-  other.querySelector('.doorBack img').style.visibility='hidden';
-  chosen.classList.add('opened');
   const img=chosen.querySelector('.doorBack img');
+
+  chosen.classList.add('opened');
   img.style.visibility='visible';
 
   const isWrong=img.src.includes(wrongImage);
   if(isWrong) lives--;
   renderLives();
-  resultBigEl.style.fontSize='80px';
-  resultBigEl.style.color='red';
 
+  /* Lose */
   if(isWrong && lives<=0){
-    resultBigEl.textContent='Game Over';
-    showStorySequence(storyLose,()=>{
-      setTimeout(() => {
+    showEnding("GAME OVER",()=>{
+      showStorySequence(storyLose,()=>{
         round=0; lives=3;
-        showStorySequence(storyStart, setupRound);
-      }, 800);
+        showStorySequence(storyStart,setupRound);
+      });
     });
-  } else if(!isWrong && round>=maxRounds){
-    resultBigEl.textContent='WIN';
-    showStorySequence(storyWin,()=>{
-      setTimeout(() => {
-        round=0; lives=3;
-        showStorySequence(storyStart, setupRound);
-      }, 800);
-    });
-  } else{
-    resultBigEl.textContent=isWrong?'❌':'🤡';
-    setTimeout(()=>{ busy=false; setupRound(); },600);
+    return;
   }
-}
 
-doors.forEach((d,i)=>d.addEventListener('click',()=>openDoor(i)));
+  /* Win */
+  if(!isWrong && round>=maxRounds){
+    showEnding("WIN",()=>{
+      showStorySequence(storyWin,()=>{
+        round=0; lives=3;
+        showStorySequence(storyStart,setupRound);
+      });
+    });
+    return;
+  }
+
+  /* 下一回合 */
+  setTimeout(()=>{ busy=false; setupRound(); },600);
+}
 
 /* 開始遊戲 */
 showStorySequence(storyStart,setupRound);
