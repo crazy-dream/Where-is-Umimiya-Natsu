@@ -48,6 +48,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   justify-content:center;
   align-items:flex-start;
   width:100%;
+  margin-top: 50px; /* 往下移门 */
 }
 .doorWrap{
   width:520px;
@@ -92,6 +93,10 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   padding:8px;
   visibility: hidden;
 }
+.doorBack .resultText{
+  font-size: 120px;
+  display: none;
+}
 .opened .doorFront{ transform: rotateX(-180deg); }
 
 /* 故事畫面 - 全螢幕 */
@@ -117,7 +122,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   right:20px;
   top:50%;
   transform:translateY(-50%);
-  color:black;
+  color:white; /* 改为白色 */
   background:none;
   padding:0;
   font-size:16px;
@@ -131,7 +136,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 #endingScreen{
   position:fixed;
   left:0;top:0;right:0;bottom:0;
-  background:rgba(255,255,255,0.96);
+  background: var(--bg); /* 改为蓝色背景 */
   display:none;
   z-index:2000;
   justify-content:center;
@@ -162,11 +167,11 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 <section class="stage" id="gameStage">
   <div class="doors">
     <div class="doorWrap" id="door0">
-      <div class="doorBack"><img src="" alt="" /></div>
+      <div class="doorBack"><img src="" alt="" /><div class="resultText"></div></div>
       <div class="doorFront"><div class="dotMark"></div></div>
     </div>
     <div class="doorWrap" id="door1">
-      <div class="doorBack"><img src="" alt="" /></div>
+      <div class="doorBack"><img src="" alt="" /><div class="resultText"></div></div>
       <div class="doorFront"><div class="dotMark"></div></div>
     </div>
   </div>
@@ -200,7 +205,7 @@ const correctImages = [
 "joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440.jpg","joker/IMG_20251118_213550_407.jpg",
 "joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp","joker/unnamed.webp",
 "joker/未命名設計.jpg","joker/未命名設計.png"];
-const wrongImage="wrong/Ri86b7h.jpg";
+const wrongImage="Ri86b7h.jpg"; // 改为 Ri86b7h.jpg
 
 const maxRounds=6;
 let round=0, lives=3, busy=false, currentCorrectDoor=0;
@@ -229,6 +234,12 @@ function showStorySequence(images, callback){
 
   let idx=0;
   storyImg.src=images[idx];
+  // 根据图片索引设置提示文本
+  if (images === storyStart || images === storyLose || (images === storyWin && idx < 1)) {
+    tapHint.textContent = '點擊任意地方繼續';
+  } else if (images === storyWin && idx === 1) {
+    tapHint.textContent = '點擊任意地方在一次';
+  }
 
   overlay.onclick=function(){
     idx++;
@@ -241,6 +252,12 @@ function showStorySequence(images, callback){
       return;
     }
     storyImg.src=images[idx];
+    // 更新提示文本
+    if (images === storyStart || images === storyLose || (images === storyWin && idx < 1)) {
+      tapHint.textContent = '點擊任意地方繼續';
+    } else if (images === storyWin && idx === 1) {
+      tapHint.textContent = '點擊任意地方在一次';
+    }
   }
 }
 
@@ -261,13 +278,17 @@ function setupRound(){
   currentCorrectDoor=Math.random()<0.5?0:1;
   doors.forEach(dw=>{
     const img=dw.querySelector('.doorBack img');
+    const resultText=dw.querySelector('.doorBack .resultText');
     img.src="";
     img.style.visibility='hidden';
+    resultText.style.display='none';
     dw.classList.remove('opened');
   });
+  // 正确门显示小丑图片（但根据要求，改为emo？这里保留图片，但可以改为文本）
   doors[currentCorrectDoor].querySelector('.doorBack img').src=
     correctImages[Math.floor(Math.random()*correctImages.length)];
-  doors[1-currentCorrectDoor].querySelector('.doorBack img').src=wrongImage;
+  // 错误门显示叉叉（文本）
+  doors[1-currentCorrectDoor].querySelector('.doorBack .resultText').textContent = '❌';
 }
 
 function openDoor(idx){
@@ -275,10 +296,17 @@ function openDoor(idx){
   busy=true;
   const chosen=doors[idx];
   const img=chosen.querySelector('.doorBack img');
+  const resultText=chosen.querySelector('.doorBack .resultText');
   chosen.classList.add('opened');
-  img.style.visibility='visible';
+  if (idx === currentCorrectDoor) {
+    img.style.visibility='visible'; // 显示小丑图片
+    resultText.style.display='none';
+  } else {
+    img.style.visibility='hidden';
+    resultText.style.display='block'; // 显示叉叉
+  }
 
-  const isWrong=img.src.includes(wrongImage);
+  const isWrong=idx !== currentCorrectDoor;
   if(isWrong) lives--;
   renderLives();
 
@@ -311,4 +339,3 @@ showStorySequence(storyStart,setupRound);
 </script>
 </body>
 </html>
-
