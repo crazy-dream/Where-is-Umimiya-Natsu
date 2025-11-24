@@ -121,7 +121,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   font-weight:700;
 }
 
-/* ★新增：結算超大字幕 */
+/* ★結算大字幕 */
 #endingScreen{
   position:fixed;
   left:0;top:0;right:0;bottom:0;
@@ -168,7 +168,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   <div class="tapHint">點擊任意位置繼續</div>
 </div>
 
-<!-- ★新增：結算大字幕 -->
+<!-- ★結算顯示 -->
 <div id="endingScreen">
   <div id="endingText"></div>
 </div>
@@ -258,7 +258,7 @@ function showStorySequence(images, callback){
 }
 
 /* --------------------
-   顯示大結算字（先）
+   結算大字幕
 -------------------- */
 function showEnding(text, after){
   endingText.textContent=text;
@@ -272,7 +272,7 @@ function showEnding(text, after){
 }
 
 /* --------------------
-   回合
+   回合流程
 -------------------- */
 doors.forEach((d,i)=>d.addEventListener('click',()=>openDoor(i)));
 
@@ -307,25 +307,32 @@ function openDoor(idx){
   if(isWrong) lives--;
   renderLives();
 
+  /* ★ 等動畫翻轉完再結算 */
+  const delay = 1000;
+
   /* Lose */
   if(isWrong && lives<=0){
-    showEnding("GAME OVER",()=>{
-      showStorySequence(storyLose,()=>{
-        round=0; lives=3;
-        showStorySequence(storyStart,setupRound);
+    setTimeout(()=>{
+      showEnding("GAME OVER",()=>{
+        showStorySequence(storyLose,()=>{
+          round=0; lives=3;
+          showStorySequence(storyStart,setupRound);
+        });
       });
-    });
+    },delay);
     return;
   }
 
   /* Win */
   if(!isWrong && round>=maxRounds){
-    showEnding("WIN",()=>{
-      showStorySequence(storyWin,()=>{
-        round=0; lives=3;
-        showStorySequence(storyStart,setupRound);
+    setTimeout(()=>{
+      showEnding("WIN",()=>{
+        showStorySequence(storyWin,()=>{
+          round=0; lives=3;
+          showStorySequence(storyStart,setupRound);
+        });
       });
-    });
+    },delay);
     return;
   }
 
