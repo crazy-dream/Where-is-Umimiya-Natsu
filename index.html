@@ -121,11 +121,11 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   font-weight:700;
 }
 
-/* ★結算大字幕 */
+/* ★結算大字幕 - 修改這裡 */
 #endingScreen{
   position:fixed;
   left:0;top:0;right:0;bottom:0;
-  background:rgba(255,255,255,0.96);
+  background:var(--bg);
   display:none;
   z-index:2000;
   justify-content:center;
@@ -168,7 +168,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   <div class="tapHint">點擊任意位置繼續</div>
 </div>
 
-<!-- ★結算顯示 -->
+<!-- 結算顯示 -->
 <div id="endingScreen">
   <div id="endingText"></div>
 </div>
@@ -307,7 +307,6 @@ function openDoor(idx){
   if(isWrong) lives--;
   renderLives();
 
-  /* ★ 等動畫翻轉完再結算 */
   const delay = 1000;
 
   /* Lose */
@@ -336,7 +335,6 @@ function openDoor(idx){
     return;
   }
 
-  /* 下一回合 */
   setTimeout(()=>{ busy=false; setupRound(); },600);
 }
 
