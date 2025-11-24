@@ -48,7 +48,6 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   justify-content:center;
   align-items:flex-start;
   width:100%;
-  margin-top:60px; /* 藍色門下移 */
 }
 .doorWrap{
   width:520px;
@@ -112,7 +111,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 }
 .overlay.show{ display:flex; }
 
-/* 右側直排提示 */
+/* 點擊提示 */
 .tapHint{
   position:absolute;
   right:20px;
@@ -125,8 +124,28 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   font-weight:700;
   writing-mode: vertical-rl;
   text-align:center;
-  display:none; /* 初始不顯示 */
   cursor:pointer;
+}
+
+/* 結算大字幕 */
+#endingScreen{
+  position:fixed;
+  left:0;top:0;right:0;bottom:0;
+  background:rgba(255,255,255,0.96);
+  display:none;
+  z-index:2000;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+}
+#endingScreen.show{
+  display:flex;
+}
+#endingText{
+  font-size:110px;
+  font-weight:900;
+  color:red;
+  text-shadow:0 0 12px rgba(0,0,0,0.5);
 }
 
 @media(max-width:860px){
@@ -156,7 +175,12 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 <!-- 故事全螢幕 -->
 <div class="overlay" id="overlay">
   <img src="" id="storyImg">
-  <div class="tapHint" id="tapHint">點擊任意地方繼續</div>
+  <div class="tapHint">點擊任意地方繼續</div>
+</div>
+
+<!-- 結算大字幕 -->
+<div id="endingScreen">
+  <div id="endingText"></div>
 </div>
 
 <script>
@@ -164,41 +188,19 @@ const storyStart = [
   "story/洋芋片1.jpg","story/洋芋片2.jpg","story/洋芋片3.jpg",
   "story/洋芋片4.jpg","story/洋芋片5.jpg","story/洋芋片6.jpg"
 ];
-const storyEnd = ["story/洋芋片7.jpg","story/洋芋片8.jpg","story/洋芋片9.jpg"];
+const storyWin = ["story/洋芋片8.jpg","story/洋芋片9.jpg"];
+const storyLose = ["story/洋芋片7.jpg","story/洋芋片8.jpg","story/洋芋片9.jpg"];
 
 const correctImages = [
-  "joker/1.png",
-  "joker/1000018658.jpeg",
-  "joker/1000018659.jpeg",
-  "joker/2.png",
-  "joker/3.png",
-  "joker/4 (2).png",
-  "joker/4.png",
-  "joker/5.png",
-  "joker/546175134_1138063744950693_180659281319095751_n.jpg",
-  "joker/Am I (1).jpg",
-  "joker/Am I (2).jpg",
-  "joker/Am I (3).jpg",
-  "joker/Am I (4).jpg",
-  "joker/Am I.jpg",
-  "joker/I am joker. (1).jpg",
-  "joker/I am joker. (2).jpg",
-  "joker/I am joker. (3).jpg",
-  "joker/I am joker. 的複本 (1).jpg",
-  "joker/I am joker..jpg",
-  "joker/I am joker..png",
-  "joker/IMG_20250806_193336_118.jpg",
-  "joker/IMG_20251001_224237_440-removebg-preview.png",
-  "joker/IMG_20251118_213550_407.jpg",
-  "joker/unnamed (1).webp",
-  "joker/unnamed (2).webp",
-  "joker/unnamed (4).webp",
-  "joker/unnamed.webp",
-  "joker/未命名設計.jpg",
-  "joker/未命名設計.png"
-];
-
-const wrongImage="wrong/Ri86b7h.jpg";
+"joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png","joker/3.png",
+"joker/4 (2).png","joker/4.png","joker/5.png","joker/546175134_1138063744950693_180659281319095751_n.jpg",
+"joker/Am I (1).jpg","joker/Am I (2).jpg","joker/Am I (3).jpg","joker/Am I (4).jpg","joker/Am I.jpg",
+"joker/I am joker. (1).jpg","joker/I am joker. (2).jpg","joker/I am joker. (3).jpg",
+"joker/I am joker. 的複本 (1).jpg","joker/I am joker..jpg","joker/I am joker..png",
+"joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440.jpg","joker/IMG_20251118_213550_407.jpg",
+"joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp","joker/unnamed.webp",
+"joker/未命名設計.jpg","joker/未命名設計.png"];
+const wrongImage="Ri86b7h.jpg";
 
 const maxRounds=6;
 let round=0, lives=3, busy=false, currentCorrectDoor=0;
@@ -209,7 +211,9 @@ const livesEl=document.getElementById('lives');
 const overlay=document.getElementById('overlay');
 const storyImg=document.getElementById('storyImg');
 const gameStage=document.getElementById('gameStage');
-const tapHint=document.getElementById('tapHint');
+const endingScreen=document.getElementById('endingScreen');
+const endingText=document.getElementById('endingText');
+const tapHint=document.querySelector('.tapHint');
 
 function renderLives(){
   livesEl.innerHTML='';
@@ -218,10 +222,10 @@ function renderLives(){
 }
 function renderRound(){ roundNumEl.textContent=round; }
 
-function showStorySequence(images, callback, showTapHint=false){
+function showStorySequence(images, callback){
   gameStage.style.display='none';
   overlay.classList.add('show');
-  tapHint.style.display = showTapHint ? 'block' : 'none';
+  tapHint.style.display='block';
 
   let idx=0;
   storyImg.src=images[idx];
@@ -237,6 +241,16 @@ function showStorySequence(images, callback, showTapHint=false){
       return;
     }
     storyImg.src=images[idx];
+  }
+}
+
+function showEnding(text, after){
+  endingText.textContent=text;
+  endingScreen.classList.add('show');
+  endingScreen.onclick=function(){
+    endingScreen.onclick=null;
+    endingScreen.classList.remove('show');
+    after();
   }
 }
 
@@ -268,9 +282,24 @@ function openDoor(idx){
   if(isWrong) lives--;
   renderLives();
 
-  if(isWrong || (!isWrong && round>=maxRounds)){
-    // 播放洋芋片7,8,9，最後一張才顯示點擊提示
-    showStorySequence(storyEnd, ()=>{ round=0; lives=3; setupRound(); }, true);
+  if(isWrong && lives<=0){
+    showEnding("GAME OVER",()=>{
+      showStorySequence(storyLose,()=>{
+        round=0; lives=3;
+        showStorySequence(storyStart,setupRound);
+      });
+    });
+    return;
+  }
+
+  if(!isWrong && round>=maxRounds){
+    showEnding("WIN",()=>{
+      showStorySequence(storyWin,()=>{
+        round=0; lives=3;
+        // 洋芋片9播完後再一次提示
+        showStorySequence(storyStart,setupRound);
+      });
+    });
     return;
   }
 
