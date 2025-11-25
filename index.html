@@ -56,7 +56,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   position:relative;
 }
 
-/* ★ 門翻開 1.8 秒 */
+/* ✔ 門翻開 1.8 秒 */
 .doorFront{
   width:100%; height:100%; border-radius:18px;
   background:linear-gradient(180deg,var(--door-front),var(--door));
@@ -68,14 +68,24 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   position:absolute; top:0; left:0; z-index:5;
 }
 
-.dotMark{
-  width:60px;height:60px;border-radius:50%;
-  background:var(--accent); display:flex;
-  align-items:center;justify-content:center;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+/* ✔ 圖片預設不可見 */
+.doorBack img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  padding:8px;
+  visibility:hidden;
+  opacity:0;
+  transition: opacity 1.8s;
 }
 
-/* ★ 背面圖片淡入 1.8 秒 */
+/* ✔ 門翻開時圖片同步淡入 */
+.opened .doorBack img{
+  visibility:visible;
+  opacity:1;
+}
+
 .doorBack{
   width:100%; height:100%;
   border-radius:18px;
@@ -89,19 +99,9 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   z-index:1;
   box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
 }
-.doorBack img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;
-  padding:8px;
-  opacity:0;
-  transition: opacity 1.8s ease;
-}
 .opened .doorFront{ transform: rotateX(-180deg); }
-.opened .doorBack img{ opacity:1; }
 
-/* 故事畫面 - 全螢幕 */
+/* 全螢幕故事 */
 .overlay{
   position:fixed;left:0;top:0;right:0;bottom:0;
   background:rgba(255,255,255,0.97);
@@ -128,7 +128,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   font-weight:700;
 }
 
-/* ★ 結算背景改藍色 */
+/* ✔ WIN / GAME OVER藍色背景 */
 #endingScreen{
   position:fixed;
   left:0;top:0;right:0;bottom:0;
@@ -139,9 +139,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   align-items:center;
   cursor:pointer;
 }
-#endingScreen.show{
-  display:flex;
-}
+#endingScreen.show{ display:flex; }
 #endingText{
   font-size:110px;
   font-weight:900;
@@ -196,7 +194,7 @@ const storyWin = ["story/洋芋片8.jpg","story/洋芋片9.jpg"];
 const storyLose = ["story/洋芋片7.jpg","story/洋芋片8.jpg","story/洋芋片9.jpg"];
 
 /* --------------------
-   圖片資料
+   圖片
 -------------------- */
 const correctImages = [
 "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png","joker/3.png",
@@ -224,7 +222,7 @@ const endingScreen=document.getElementById('endingScreen');
 const endingText=document.getElementById('endingText');
 
 /* --------------------
-   顯示血量
+   血量顯示
 -------------------- */
 function renderLives(){
   livesEl.innerHTML='';
@@ -242,7 +240,7 @@ function renderLives(){
 function renderRound(){ roundNumEl.textContent=round; }
 
 /* --------------------
-   顯示故事
+   故事流程
 -------------------- */
 function showStorySequence(images, callback){
   gameStage.style.display='none';
@@ -265,7 +263,7 @@ function showStorySequence(images, callback){
 }
 
 /* --------------------
-   結算大字幕
+   WIN / LOSE 背景
 -------------------- */
 function showEnding(text, after){
   endingText.textContent=text;
@@ -279,7 +277,7 @@ function showEnding(text, after){
 }
 
 /* --------------------
-   回合流程
+   遊戲流程
 -------------------- */
 doors.forEach((d,i)=>d.addEventListener('click',()=>openDoor(i)));
 
@@ -291,6 +289,7 @@ function setupRound(){
   doors.forEach((dw)=>{
     const img=dw.querySelector('.doorBack img');
     img.src="";
+    img.style.visibility='hidden';
     img.style.opacity=0;
     dw.classList.remove('opened');
   });
@@ -315,7 +314,6 @@ function openDoor(idx){
 
   const delay = 1800;
 
-  /* Lose */
   if(isWrong && lives<=0){
     setTimeout(()=>{
       showEnding("GAME OVER",()=>{
@@ -328,7 +326,6 @@ function openDoor(idx){
     return;
   }
 
-  /* Win */
   if(!isWrong && round>=maxRounds){
     setTimeout(()=>{
       showEnding("WIN",()=>{
@@ -344,7 +341,7 @@ function openDoor(idx){
   setTimeout(()=>{ busy=false; setupRound(); },1000);
 }
 
-/* 開始遊戲 */
+/* 開始 */
 showStorySequence(storyStart,setupRound);
 </script>
 </body>
