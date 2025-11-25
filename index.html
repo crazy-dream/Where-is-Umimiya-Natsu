@@ -56,7 +56,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   position:relative;
 }
 
-/* ✔ 門翻開 1.8 秒 */
+/* 門翻開時間延長  */
 .doorFront{
   width:100%; height:100%; border-radius:18px;
   background:linear-gradient(180deg,var(--door-front),var(--door));
@@ -67,25 +67,12 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   box-shadow:0 14px 30px rgba(0,0,0,0.15);
   position:absolute; top:0; left:0; z-index:5;
 }
-
-/* ✔ 圖片預設不可見 */
-.doorBack img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;
-  padding:8px;
-  visibility:hidden;
-  opacity:0;
-  transition: opacity 1.8s;
+.dotMark{
+  width:60px;height:60px;border-radius:50%;
+  background:var(--accent); display:flex;
+  align-items:center;justify-content:center;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
 }
-
-/* ✔ 門翻開時圖片同步淡入 */
-.opened .doorBack img{
-  visibility:visible;
-  opacity:1;
-}
-
 .doorBack{
   width:100%; height:100%;
   border-radius:18px;
@@ -99,9 +86,17 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   z-index:1;
   box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
 }
+.doorBack img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  padding:8px;
+  visibility: hidden;
+}
 .opened .doorFront{ transform: rotateX(-180deg); }
 
-/* 全螢幕故事 */
+/* 故事畫面 */
 .overlay{
   position:fixed;left:0;top:0;right:0;bottom:0;
   background:rgba(255,255,255,0.97);
@@ -128,7 +123,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   font-weight:700;
 }
 
-/* ✔ WIN / GAME OVER藍色背景 */
+/* 結算背景也藍色 */
 #endingScreen{
   position:fixed;
   left:0;top:0;right:0;bottom:0;
@@ -167,36 +162,21 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   </div>
 </section>
 
-<!-- 故事全螢幕 -->
 <div class="overlay" id="overlay">
   <img src="" id="storyImg">
   <div class="tapHint">點擊任意位置繼續</div>
 </div>
 
-<!-- 結算顯示 -->
-<div id="endingScreen">
-  <div id="endingText"></div>
-</div>
+<div id="endingScreen"><div id="endingText"></div></div>
 
 <script>
-/* --------------------
-   故事素材
--------------------- */
-const storyStart = [
-  "story/洋芋片1.jpg",
-  "story/洋芋片2.jpg",
-  "story/洋芋片3.jpg",
-  "story/洋芋片4.jpg",
-  "story/洋芋片5.jpg",
-  "story/洋芋片6.jpg"
-];
-const storyWin = ["story/洋芋片8.jpg","story/洋芋片9.jpg"];
-const storyLose = ["story/洋芋片7.jpg","story/洋芋片8.jpg","story/洋芋片9.jpg"];
+/* -------------------- 故事素材 -------------------- */
+const storyStart=["story/洋芋片1.jpg","story/洋芋片2.jpg","story/洋芋片3.jpg","story/洋芋片4.jpg","story/洋芋片5.jpg","story/洋芋片6.jpg"];
+const storyWin=["story/洋芋片8.jpg","story/洋芋片9.jpg"];
+const storyLose=["story/洋芋片7.jpg","story/洋芋片8.jpg","story/洋芋片9.jpg"];
 
-/* --------------------
-   圖片
--------------------- */
-const correctImages = [
+/* -------------------- 圖片資料 -------------------- */
+const correctImages=[
 "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png","joker/3.png",
 "joker/4 (2).png","joker/4.png","joker/5.png","joker/546175134_1138063744950693_180659281319095751_n.jpg",
 "joker/Am I (1).jpg","joker/Am I (2).jpg","joker/Am I (3).jpg","joker/Am I (4).jpg","joker/Am I.jpg",
@@ -221,9 +201,7 @@ const gameStage=document.getElementById('gameStage');
 const endingScreen=document.getElementById('endingScreen');
 const endingText=document.getElementById('endingText');
 
-/* --------------------
-   血量顯示
--------------------- */
+/* 血量顯示 */
 function renderLives(){
   livesEl.innerHTML='';
   for(let i=0;i<lives;i++){
@@ -239,9 +217,7 @@ function renderLives(){
 }
 function renderRound(){ roundNumEl.textContent=round; }
 
-/* --------------------
-   故事流程
--------------------- */
+/* 故事播放 */
 function showStorySequence(images, callback){
   gameStage.style.display='none';
   overlay.classList.add('show');
@@ -262,13 +238,10 @@ function showStorySequence(images, callback){
   }
 }
 
-/* --------------------
-   WIN / LOSE 背景
--------------------- */
+/* 結束畫面 */
 function showEnding(text, after){
   endingText.textContent=text;
   endingScreen.classList.add('show');
-
   endingScreen.onclick=function(){
     endingScreen.onclick=null;
     endingScreen.classList.remove('show');
@@ -276,9 +249,7 @@ function showEnding(text, after){
   }
 }
 
-/* --------------------
-   遊戲流程
--------------------- */
+/* 回合 */
 doors.forEach((d,i)=>d.addEventListener('click',()=>openDoor(i)));
 
 function setupRound(){
@@ -290,7 +261,6 @@ function setupRound(){
     const img=dw.querySelector('.doorBack img');
     img.src="";
     img.style.visibility='hidden';
-    img.style.opacity=0;
     dw.classList.remove('opened');
   });
 
@@ -299,6 +269,7 @@ function setupRound(){
   doors[1-currentCorrectDoor].querySelector('.doorBack img').src=wrongImage;
 }
 
+/* ★ 開門 → 1.8秒後才顯示圖片 */
 function openDoor(idx){
   if(busy)return;
   busy=true;
@@ -307,6 +278,9 @@ function openDoor(idx){
   const img=chosen.querySelector('.doorBack img');
 
   chosen.classList.add('opened');
+
+  // ★ 門翻完再顯示
+  setTimeout(()=>{ img.style.visibility='visible'; },1800);
 
   const isWrong=img.src.includes(wrongImage);
   if(isWrong) lives--;
