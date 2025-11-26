@@ -27,24 +27,25 @@ body{
 header{margin-top:18px;text-align:center;}
 h1{margin:0;font-size:28px;letter-spacing:1px;}
 
-/* round 與 lives 固定位置，避開門 */
-#roundNum {
+/* topRow 固定位置，避免門擋住 */
+#roundNum{
   position: fixed;
   top:20px;
   left:20px;
-  font-weight:800;
-  font-size:28px;
-  background: rgba(255,255,255,0.8);
-  padding:10px 16px;
-  border-radius:12px;
+  font-weight:800;font-size:20px;
+  background: rgba(255,255,255,0.6);
+  padding:6px 12px;
+  border-radius:10px;
+  color:var(--text);
   z-index:2000;
 }
-#lives {
+#lives{
   position: fixed;
   top:20px;
   right:20px;
   display:flex;
-  gap:12px;
+  gap:8px;
+  align-items:center;
   z-index:2000;
 }
 .lifeDot{
@@ -76,7 +77,8 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   position:relative;
 }
 .doorFront{
-  width:100%; height:100%;
+  width:100%;
+  height:100%;
   border-radius:18px;
   background:linear-gradient(180deg,var(--door-front),var(--door));
   display:flex;
@@ -111,7 +113,8 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
 }
 .doorBack img{
-  width:100%; height:100%;
+  width:100%;
+  height:100%;
   object-fit:contain;
   display:block;
   padding:8px;
@@ -156,7 +159,9 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 </style>
 </head>
 <body>
-<header><h1>猜猜小丑在哪裡</h1></header>
+<header>
+  <h1>猜猜小丑在哪裡</h1>
+</header>
 
 <div id="roundNum">0</div>
 <div id="lives"></div>
@@ -172,9 +177,9 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
       <div class="doorFront"><div class="dotMark"></div></div>
     </div>
   </div>
+  <div id="resultBig"></div>
 </section>
 
-<div id="resultBig"></div>
 <div class="overlay" id="overlay"></div>
 
 <script>
@@ -191,9 +196,8 @@ const correctImages = [
 const wrongImage = "Ri86b7h.jpg";
 
 const maxRounds = 6;
-let round=0, correctCount=0, lives=3, busy=false;
-
-const doors = [document.getElementById('door0'), document.getElementById('door1')];
+let round = 0, correctCount = 0, lives=3, busy=false;
+const doors = [document.getElementById('door0'),document.getElementById('door1')];
 const roundNumEl = document.getElementById('roundNum');
 const livesEl = document.getElementById('lives');
 const resultBigEl = document.getElementById('resultBig');
@@ -201,17 +205,12 @@ const overlay = document.getElementById('overlay');
 
 function renderLives(){
   livesEl.innerHTML='';
-  for(let i=0;i<lives;i++){ 
-    const d=document.createElement('div'); d.className='lifeDot'; livesEl.appendChild(d);
-  }
-  for(let i=lives;i<3;i++){ 
-    const d=document.createElement('div'); d.className='lifeDot hidden'; livesEl.appendChild(d);
-  }
+  for(let i=0;i<lives;i++){ const d=document.createElement('div'); d.className='lifeDot'; livesEl.appendChild(d);}
+  for(let i=lives;i<3;i++){ const d=document.createElement('div'); d.className='lifeDot hidden'; livesEl.appendChild(d);}
 }
-function renderRound(){ roundNumEl.textContent = round; }
+function renderRound(){ roundNumEl.textContent=round; }
 
 let currentCorrectDoor=0;
-
 function setupRound(){
   round++; renderRound(); renderLives(); resultBigEl.textContent=''; busy=false; overlay.classList.remove('show');
   currentCorrectDoor=Math.random()<0.5?0:1;
@@ -231,17 +230,20 @@ function openDoor(idx){
   const img=chosen.querySelector('.doorBack img');
   img.style.visibility='visible';
   const isWrong=img.src.includes(wrongImage);
+
   if(isWrong){ lives=Math.max(0,lives-1); resultBigEl.textContent='❌'; } 
   else { resultBigEl.textContent='🤡'; correctCount++; }
+
   renderLives();
+
   setTimeout(()=>{
-    if(lives<=0){
-      resultBigEl.textContent='GAME OVER';
+    if(lives<=0){ 
+      resultBigEl.textContent='Game Over';
       resultBigEl.style.fontSize='80px';
       resultBigEl.style.color='red';
       overlay.classList.remove('show');
       busy=true;
-    } else if(round>=maxRounds){
+    } else if(round>=maxRounds){ 
       resultBigEl.textContent='WIN';
       resultBigEl.style.fontSize='80px';
       resultBigEl.style.color='red';
