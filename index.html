@@ -27,25 +27,25 @@ body{
 header{margin-top:18px;text-align:center;}
 h1{margin:0;font-size:28px;letter-spacing:1px;}
 
-/* round 與 lives 固定位置 */
+/* round 與 lives 固定位置，避開門 */
 #roundNum {
   position: fixed;
-  top: 10px;
-  left: 20px;
+  top:20px;
+  left:20px;
   font-weight:800;
-  font-size:24px;
-  background: rgba(255,255,255,0.7);
-  padding:8px 16px;
+  font-size:28px;
+  background: rgba(255,255,255,0.8);
+  padding:10px 16px;
   border-radius:12px;
-  z-index:1000;
+  z-index:2000;
 }
 #lives {
   position: fixed;
-  top: 10px;
-  right: 20px;
+  top:20px;
+  right:20px;
   display:flex;
-  gap:10px;
-  z-index:1000;
+  gap:12px;
+  z-index:2000;
 }
 .lifeDot{
   width:28px;height:28px;border-radius:50%;
@@ -119,7 +119,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 }
 .opened .doorFront{ transform: rotateX(-180deg); }
 
-/* WIN / Game Over 大字顯示 */
+/* WIN / Game Over 大字顯示在畫面中央 */
 #resultBig{
   position: fixed;
   top:50%;
@@ -131,8 +131,6 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   text-align:center;
   z-index:1500;
 }
-
-/* 簡單煙火 */
 .firework{
   position:absolute;
   width:6px;
@@ -148,7 +146,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 
 .overlay{
   position:fixed;left:0;top:0;right:0;bottom:0;
-  z-index:999; display:none;
+  z-index:1000; display:none;
 }
 .overlay.show{ display:block; }
 
