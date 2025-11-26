@@ -91,7 +91,8 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 }
 .dotMark{
   width:60px;height:60px;border-radius:50%;
-  background:var(--accent); display:flex;
+  background:var(--accent);
+  display:flex;
   align-items:center;justify-content:center;
   box-shadow: 0 6px 16px rgba(0,0,0,0.18);
 }
@@ -117,14 +118,36 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   visibility: hidden;
 }
 .opened .doorFront{ transform: rotateX(-180deg); }
-#resultBig{
-  margin-top:6px;
-  font-size:60px;
-  font-weight:900;
+
+#controls{ margin-top:14px; display:flex; gap:12px; align-items:center; }
+.btn{
+  padding:10px 14px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.9);
+  border:1px solid rgba(0,0,0,0.06);
+  font-weight:800;
+  cursor:pointer;
+}
+
+/* ★★★★★ NEW：結果畫面（另一畫面） ★★★★★ */
+#resultScreen{
+  position:fixed;
+  left:0;top:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.85);
+  z-index:2000;
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
   color:red;
   text-align:center;
-  position:relative;
 }
+#resultText{
+  font-size:100px;
+  font-weight:900;
+  margin-bottom:40px;
+}
+
 .firework{
   position:absolute;
   width:6px;
@@ -137,66 +160,54 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   0%{transform:translate(0,0); opacity:1;}
   100%{transform:translate(var(--dx,0px),var(--dy,0px)); opacity:0;}
 }
-#controls{ margin-top:14px; display:flex; gap:12px; align-items:center; }
-.btn{
-  padding:10px 14px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.9);
-  border:1px solid rgba(0,0,0,0.06);
-  font-weight:800;
-  cursor:pointer;
-}
+
 .overlay{
   position:fixed;left:0;top:0;right:0;bottom:0;
   z-index:999; display:none;
 }
-#storyDiv{
-  position:fixed; top:0; left:0; width:100%; height:100%;
-  background:black; display:none; z-index:1000;
-  display:flex; align-items:center; justify-content:center;
-}
-#storyImg{
-  max-width:100%; max-height:100%; object-fit:contain;
-}
-#gameEndDiv{
-  position:fixed; top:0; left:0; width:100%; height:100%;
-  background:black; display:none; z-index:1001;
-  display:flex; align-items:center; justify-content:center;
-  font-size:80px; font-weight:900; color:red;
-}
+.overlay.show{ display:block; }
+
 @media(max-width:860px){
   .doorWrap{ width:86vw; height:50vw; }
 }
 </style>
 </head>
 <body>
-<div id="gameEndDiv"></div>
-<div id="storyDiv"><img id="storyImg" alt="故事圖片"></div>
+
 <header>
   <h1>猜猜小丑在哪裡</h1>
 </header>
+
 <div class="topRow">
   <div id="roundNum">0</div>
   <div id="lives"></div>
 </div>
+
 <section class="stage">
   <div class="doors">
     <div class="doorWrap" id="door0">
-      <div class="doorBack"><img src="" alt="" /></div>
+      <div class="doorBack"><img src="" alt=""></div>
       <div class="doorFront"><div class="dotMark"></div></div>
     </div>
     <div class="doorWrap" id="door1">
-      <div class="doorBack"><img src="" alt="" /></div>
+      <div class="doorBack"><img src="" alt=""></div>
       <div class="doorFront"><div class="dotMark"></div></div>
     </div>
   </div>
-  <div id="resultBig"></div>
   <div id="controls">
     <button class="btn" id="playAgain" style="display:none">再玩一次</button>
     <button class="btn" id="restartBtn">重置遊戲</button>
   </div>
 </section>
+
 <div class="overlay" id="overlay"></div>
+
+<!-- ★★★★★ NEW：結果畫面 ★★★★★ -->
+<div id="resultScreen">
+  <div id="resultText"></div>
+  <button class="btn" id="resultRestart">再玩一次</button>
+</div>
+
 <script>
 const correctImages = [
     "1.png","1000018658.jpeg","1000018659.jpeg","2.png","3.png",
@@ -210,37 +221,51 @@ const correctImages = [
 ];
 const wrongImage = "Ri86b7h.jpg";
 
-const storyStart = ["./story/洋芋片1.jpg","./story/洋芋片2.jpg","./story/洋芋片3.jpg","./story/洋芋片4.jpg","./story/洋芋片5.jpg","./story/洋芋片6.jpg"];
-const storyWin = ["./story/洋芋片8.jpg","./story/洋芋片9.jpg"];
-const storyLose = ["./story/洋芋片7.jpg","./story/洋芋片8.jpg","./story/洋芋片9.jpg"];
-
 const maxRounds = 6;
 let round = 0, correctCount = 0, lives=3, busy=false;
+
 const doors = [document.getElementById('door0'),document.getElementById('door1')];
 const roundNumEl = document.getElementById('roundNum');
 const livesEl = document.getElementById('lives');
-const resultBigEl = document.getElementById('resultBig');
-const playAgainBtn = document.getElementById('playAgain');
-const restartBtn = document.getElementById('restartBtn');
 const overlay = document.getElementById('overlay');
-const storyDiv = document.getElementById('storyDiv');
-const storyImg = document.getElementById('storyImg');
-const gameEndDiv = document.getElementById('gameEndDiv');
+
+const resultScreen = document.getElementById('resultScreen');
+const resultText = document.getElementById('resultText');
+const resultRestart = document.getElementById('resultRestart');
 
 function renderLives(){
   livesEl.innerHTML='';
-  for(let i=0;i<lives;i++){ const d=document.createElement('div'); d.className='lifeDot'; livesEl.appendChild(d);}
-  for(let i=lives;i<3;i++){ const d=document.createElement('div'); d.className='lifeDot hidden'; livesEl.appendChild(d);}
+  for(let i=0;i<lives;i++){
+    const d=document.createElement('div');
+    d.className='lifeDot';
+    livesEl.appendChild(d);
+  }
+  for(let i=lives;i<3;i++){
+    const d=document.createElement('div');
+    d.className='lifeDot hidden';
+    livesEl.appendChild(d);
+  }
 }
-function renderRound(){ roundNumEl.textContent=round; }
+
+function renderRound(){
+  roundNumEl.textContent=round;
+}
 
 let currentCorrectDoor=0;
+
 function setupRound(){
-  round++; renderRound(); renderLives(); resultBigEl.textContent=''; busy=false; overlay.classList.remove('show');
+  round++;
+  renderRound(); 
+  renderLives(); 
+  busy=false;
+  overlay.classList.remove('show');
+
   currentCorrectDoor=Math.random()<0.5?0:1;
+
   doors.forEach((dw,idx)=>{
     const img=dw.querySelector('.doorBack img');
-    img.src = (idx===currentCorrectDoor)? correctImages[Math.floor(Math.random()*correctImages.length)]: wrongImage;
+    img.src = (idx===currentCorrectDoor)? 
+      correctImages[Math.floor(Math.random()*correctImages.length)] : wrongImage;
     img.style.visibility='hidden';
     dw.classList.remove('opened');
   });
@@ -249,89 +274,66 @@ function setupRound(){
 function openDoor(idx){
   if(busy) return;
   busy=true; overlay.classList.add('show');
+
   const chosen=doors[idx];
   chosen.classList.add('opened');
   const img=chosen.querySelector('.doorBack img');
   img.style.visibility='visible';
-  const isWrong=img.src.includes(wrongImage);
 
-  if(isWrong){ lives=Math.max(0,lives-1); resultBigEl.textContent='❌'; } 
-  else { resultBigEl.textContent='🤡'; correctCount++; }
+  const isWrong = img.src.includes(wrongImage);
+
+  if(isWrong){
+    lives = Math.max(0, lives-1);
+  } else {
+    correctCount++;
+  }
 
   renderLives();
 
   setTimeout(()=>{
-    if(lives<=0){ 
-      showGameEnd('Game Over', () => showStory(storyLose, ()=>{
-        playAgainBtn.style.display='inline-block';
-        overlay.classList.remove('show');
-        busy=true;
-      }));
-    } else if(round>=maxRounds){ 
-      showGameEnd('WIN', () => showStory(storyWin, ()=>{
-        createFireworks();
-        playAgainBtn.style.display='inline-block';
-        overlay.classList.remove('show');
-        busy=true;
-      }));
-    } else {
-      busy=false; overlay.classList.remove('show'); setupRound();
+    if(lives<=0){
+      showResult("Game Over", false);
+    }
+    else if(round>=maxRounds){
+      showResult("WIN", true);
+    }
+    else{
+      busy=false;
+      overlay.classList.remove('show');
+      setupRound();
     }
   },600);
 }
 
+/* ★★★★★ NEW — 顯示結果畫面 ★★★★★ */
+function showResult(text, isWin){
+  resultText.textContent = text;
+  resultScreen.style.display = "flex";
+
+  if(isWin) createFireworks();
+}
+
+/* ★★★★★ 再玩一次 ★★★★★ */
 function resetGame(){
-  round=0; correctCount=0; lives=3; playAgainBtn.style.display='none';
-  resultBigEl.textContent=''; resultBigEl.style.fontSize='60px'; resultBigEl.style.color='red';
-  showStory(storyStart, ()=>{ setupRound(); });
+  round=0; correctCount=0; lives=3;
+  resultScreen.style.display="none";
   overlay.classList.remove('show');
-}
-
-function showGameEnd(text, callback) {
-  gameEndDiv.textContent = text;
-  gameEndDiv.style.display = 'flex';
-  setTimeout(() => {
-    gameEndDiv.style.display = 'none';
-    callback();
-  }, 2000); // 顯示2秒
-}
-
-function showStory(images, callback) {
-  if (images.length === 0) { callback(); return; }
-  storyDiv.style.display = 'flex';
-  let idx = 0;
-  function next() {
-    if (idx >= images.length) {
-      storyDiv.style.display = 'none';
-      callback();
-      return;
-    }
-    storyImg.src = images[idx];
-    storyImg.onload = () => {
-      idx++;
-      setTimeout(next, 2000); // 每張圖片顯示2秒
-    };
-    storyImg.onerror = () => {
-      console.log('圖片載入失敗:', images[idx]);
-      idx++;
-      next(); // 跳過失敗的圖片
-    };
-  }
-  next();
+  setupRound();
 }
 
 doors.forEach((d,i)=> d.addEventListener('click',()=>openDoor(i)));
-playAgainBtn.addEventListener('click',resetGame);
-restartBtn.addEventListener('click',resetGame);
+resultRestart.addEventListener('click', resetGame);
+document.getElementById('restartBtn').addEventListener('click', resetGame);
 
+/* WIN 煙火 */
 function createFireworks(){
-  for(let i=0;i<30;i++){
+  for(let i=0;i<40;i++){
     const f=document.createElement('div');
     f.className='firework';
-    f.style.setProperty('--dx',(Math.random()*600-300)+'px');
-    f.style.setProperty('--dy',(-Math.random()*400)+'px');
+    f.style.setProperty('--dx',(Math.random()*800-400)+'px');
+    f.style.setProperty('--dy',(-Math.random()*500)+'px');
     f.style.background=['#ff0044','#ffcc00','#00ffcc'][Math.floor(Math.random()*3)];
-    resultBigEl.appendChild(f);
+    resultScreen.appendChild(f);
     setTimeout(()=>{ f.remove(); },1000);
   }
 }
