@@ -25,242 +25,318 @@ body{
   user-select:none;
 }
 header{margin-top:18px;text-align:center;}
-h1{margin:0;font-size:28px;}
-.stage-container{
-  position:relative; width:100%; display:flex; justify-content:center;
+h1{margin:0;font-size:28px;letter-spacing:1px;}
+.topRow{
+  width:92%; max-width:980px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:14px;margin-bottom:6px;
+  padding:0 10px;
 }
-.topLeft{
-  position:absolute; top:10px; left:10px; font-weight:800; font-size:20px;
-  background: rgba(255,255,255,0.6); padding:6px 12px; border-radius:10px;
+#roundNum{
+  font-weight:800;font-size:20px;
+  background: rgba(255,255,255,0.6);
+  padding:6px 12px;
+  border-radius:10px;
+  color:var(--text);
 }
-.topRight{
-  position:absolute; top:10px; right:10px; display:flex; gap:8px; align-items:center;
+#lives{
+  display:flex;
+  gap:8px;
+  align-items:center;
 }
-.lifeDot{width:28px;height:28px;border-radius:50%;background:var(--accent);}
+.lifeDot{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 4px 10px rgba(0,0,0,0.15);
+}
 .lifeDot.hidden{opacity:0.15;}
-
-.stage{ width:92%; max-width:980px; display:flex; flex-direction:column; align-items:center; gap:18px; margin-bottom:40px; }
-
-.doors{ display:flex; gap:36px; justify-content:center; align-items:flex-start; width:100%; }
-
-.doorWrap{ width:520px; height:360px; perspective:1200px; position:relative; }
-
+.stage{
+  width:92%; max-width:980px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:18px;
+  margin-bottom:40px;
+}
+.doors{
+  display:flex;
+  gap:36px;
+  justify-content:center;
+  align-items:flex-start;
+  width:100%;
+}
+.doorWrap{
+  width:520px;
+  height:360px;
+  perspective:1200px;
+  position:relative;
+}
 .doorFront{
-  width:100%; height:100%; border-radius:18px;
+  width:100%;
+  height:100%;
+  border-radius:18px;
   background:linear-gradient(180deg,var(--door-front),var(--door));
-  display:flex; justify-content:center; align-items:center;
+  display:flex;
+  justify-content:center;
+  align-items:center;
   transform-origin: top center;
   transform: rotateX(0deg);
-  transition: transform 1.8s cubic-bezier(.2,.8,.2,1);
-  position:absolute; top:0; left:0; z-index:5;
+  transition: transform 1s cubic-bezier(.2,.8,.2,1);
+  box-shadow:0 14px 30px rgba(0,0,0,0.15);
+  position:absolute;
+  top:0; left:0;
+  z-index:5;
 }
 .dotMark{
   width:60px;height:60px;border-radius:50%;
   background:var(--accent); display:flex;
-  align-items:center; justify-content:center;
+  align-items:center;justify-content:center;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
 }
 .doorBack{
-  width:100%; height:100%; border-radius:18px;
-  background:white; overflow:hidden;
-  position:absolute; top:0; left:0; z-index:1;
+  width:100%; height:100%;
+  border-radius:18px;
+  background:white;
+  overflow:hidden;
+  position:absolute;
+  top:0; left:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
 }
-.doorBack img{ width:100%; height:100%; object-fit:contain; display:block; padding:8px; visibility:hidden; }
+.doorBack img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  padding:8px;
+  visibility: hidden;
+}
 .opened .doorFront{ transform: rotateX(-180deg); }
-
+#resultBig{
+  margin-top:6px;
+  font-size:60px;
+  font-weight:900;
+  color:red;
+  text-align:center;
+  position:relative;
+}
+.firework{
+  position:absolute;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#ff0044;
+  animation: fireAnim 1s ease-out infinite;
+}
+@keyframes fireAnim{
+  0%{transform:translate(0,0); opacity:1;}
+  100%{transform:translate(var(--dx,0px),var(--dy,0px)); opacity:0;}
+}
+#controls{ margin-top:14px; display:flex; gap:12px; align-items:center; }
+.btn{
+  padding:10px 14px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.9);
+  border:1px solid rgba(0,0,0,0.06);
+  font-weight:800;
+  cursor:pointer;
+}
 .overlay{
-  position:fixed; left:0; top:0; right:0; bottom:0;
-  background:rgba(255,255,255,0.97);
-  display:none; justify-content:center; align-items:center;
-  z-index:999; cursor:pointer;
+  position:fixed;left:0;top:0;right:0;bottom:0;
+  z-index:999; display:none;
 }
-.overlay.show{ display:flex; }
-.overlay img{ width:100vw;height:100vh;object-fit:cover; }
-.tapHint{ position:absolute; bottom:30px; background:white; padding:10px 20px; border-radius:8px; }
-
-#endingScreen{
-  position:fixed; left:0; top:0; right:0; bottom:0;
-  display:none; justify-content:center; align-items:center;
-  background:var(--bg); z-index:2000; cursor:pointer;
+#storyDiv{
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:black; display:none; z-index:1000;
+  display:flex; align-items:center; justify-content:center;
 }
-#endingScreen.show{ display:flex; }
-#endingText{
-  font-size:110px; font-weight:900; color:red;
-  text-shadow:0 0 12px rgba(0,0,0,0.6);
+#storyImg{
+  max-width:100%; max-height:100%; object-fit:contain;
+}
+#gameEndDiv{
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:black; display:none; z-index:1001;
+  display:flex; align-items:center; justify-content:center;
+  font-size:80px; font-weight:900; color:red;
+}
+@media(max-width:860px){
+  .doorWrap{ width:86vw; height:50vw; }
 }
 </style>
 </head>
 <body>
-<header><h1>猜猜小丑在哪裡</h1></header>
-
-<div class="stage-container">
-  <div class="topLeft" id="roundNum">0</div>
-  <div class="topRight" id="lives"></div>
+<div id="gameEndDiv"></div>
+<div id="storyDiv"><img id="storyImg" alt="故事圖片"></div>
+<header>
+  <h1>猜猜小丑在哪裡</h1>
+</header>
+<div class="topRow">
+  <div id="roundNum">0</div>
+  <div id="lives"></div>
 </div>
-
-<section class="stage" id="gameStage">
+<section class="stage">
   <div class="doors">
     <div class="doorWrap" id="door0">
-      <div class="doorBack"><img src=""></div>
+      <div class="doorBack"><img src="" alt="" /></div>
       <div class="doorFront"><div class="dotMark"></div></div>
     </div>
     <div class="doorWrap" id="door1">
-      <div class="doorBack"><img src=""></div>
+      <div class="doorBack"><img src="" alt="" /></div>
       <div class="doorFront"><div class="dotMark"></div></div>
     </div>
   </div>
+  <div id="resultBig"></div>
+  <div id="controls">
+    <button class="btn" id="playAgain" style="display:none">再玩一次</button>
+    <button class="btn" id="restartBtn">重置遊戲</button>
+  </div>
 </section>
-
-<div class="overlay" id="overlay">
-  <img id="storyImg">
-  <div class="tapHint">點擊任意位置繼續</div>
-</div>
-
-<div id="endingScreen"><div id="endingText"></div></div>
-
+<div class="overlay" id="overlay"></div>
 <script>
-// ====== 資源 ======
-const storyStart=["./story/洋芋片1.jpg","./story/洋芋片2.jpg","./story/洋芋片3.jpg","./story/洋芋片4.jpg","./story/洋芋片5.jpg","./story/洋芋片6.jpg"];
-const storyWin  =["./story/洋芋片8.jpg","./story/洋芋片9.jpg"];
-const storyLose =["./story/洋芋片7.jpg","./story/洋芋片8.jpg","./story/洋芋片9.jpg"];
-
-const correctImages=[
-  "./joker/1.png","./joker/1000018658.jpeg","./joker/1000018659.jpeg",
-  "./joker/2.png","./joker/3.png","./joker/4.png",
-  "./joker/Am I (1).jpg","./joker/Am I (2).jpg","./joker/Am I (3).jpg",
-  "./joker/I am joker..jpg","./joker/IMG_20251118_213550_407.jpg"
+const correctImages = [
+    "1.png","1000018658.jpeg","1000018659.jpeg","2.png","3.png",
+    "4 (2).png","4.png","5.png","546175134_1138063744950693_180659281319095751_n.jpg",
+    "Am I (1).jpg","Am I (2).jpg","Am I (3).jpg","Am I (4).jpg","Am I.jpg",
+    "I am joker. (1).jpg","I am joker. (2).jpg","I am joker. (3).jpg",
+    "I am joker. 的複本 (1).jpg","I am joker..jpg","I am joker..png",
+    "IMG_20250806_193336_118.jpg","IMG_20251001_224237_440.jpg","IMG_20251118_213550_407.jpg",
+    "unnamed (1).webp","unnamed (2).webp","unnamed (4).webp","unnamed.webp",
+    "未命名設計.jpg","未命名設計.png"
 ];
-const wrongImage="./wrong/Ri86b7h.jpg";
+const wrongImage = "Ri86b7h.jpg";
 
-// ====== 狀態 ======
-let round=0, lives=3, busy=false, currentCorrectDoor=0;
+const storyStart = ["./story/洋芋片1.jpg","./story/洋芋片2.jpg","./story/洋芋片3.jpg","./story/洋芋片4.jpg","./story/洋芋片5.jpg","./story/洋芋片6.jpg"];
+const storyWin = ["./story/洋芋片8.jpg","./story/洋芋片9.jpg"];
+const storyLose = ["./story/洋芋片7.jpg","./story/洋芋片8.jpg","./story/洋芋片9.jpg"];
 
-const doors=[document.getElementById("door0"),document.getElementById("door1")];
-const roundNumEl=document.getElementById("roundNum");
-const livesEl=document.getElementById("lives");
-const gameStage=document.getElementById("gameStage");
-const overlay=document.getElementById("overlay");
-const storyImg=document.getElementById("storyImg");
-const endingScreen=document.getElementById("endingScreen");
-const endingText=document.getElementById("endingText");
+const maxRounds = 6;
+let round = 0, correctCount = 0, lives=3, busy=false;
+const doors = [document.getElementById('door0'),document.getElementById('door1')];
+const roundNumEl = document.getElementById('roundNum');
+const livesEl = document.getElementById('lives');
+const resultBigEl = document.getElementById('resultBig');
+const playAgainBtn = document.getElementById('playAgain');
+const restartBtn = document.getElementById('restartBtn');
+const overlay = document.getElementById('overlay');
+const storyDiv = document.getElementById('storyDiv');
+const storyImg = document.getElementById('storyImg');
+const gameEndDiv = document.getElementById('gameEndDiv');
 
-// ====== UI ======
-function renderRound(){ roundNumEl.textContent=round; }
 function renderLives(){
-  livesEl.innerHTML="";
-  for(let i=0;i<3;i++){
-    const d=document.createElement("div");
-    d.className="lifeDot" + (i<lives?"":" hidden");
-    livesEl.appendChild(d);
-  }
+  livesEl.innerHTML='';
+  for(let i=0;i<lives;i++){ const d=document.createElement('div'); d.className='lifeDot'; livesEl.appendChild(d);}
+  for(let i=lives;i<3;i++){ const d=document.createElement('div'); d.className='lifeDot hidden'; livesEl.appendChild(d);}
 }
+function renderRound(){ roundNumEl.textContent=round; }
 
-// ====== 最重要的修正：門關起後才換圖片 ======
-function prepareImages(){
-  // 先把圖片塞到門後，但保持看不到（visibility: hidden）
+let currentCorrectDoor=0;
+function setupRound(){
+  round++; renderRound(); renderLives(); resultBigEl.textContent=''; busy=false; overlay.classList.remove('show');
   currentCorrectDoor=Math.random()<0.5?0:1;
-  const good=doors[currentCorrectDoor].querySelector("img");
-  const bad =doors[1-currentCorrectDoor].querySelector("img");
-
-  good.src=correctImages[Math.floor(Math.random()*correctImages.length)];
-  bad.src=wrongImage;
-
-  good.style.visibility="hidden";
-  bad.style.visibility="hidden";
+  doors.forEach((dw,idx)=>{
+    const img=dw.querySelector('.doorBack img');
+    img.src = (idx===currentCorrectDoor)? correctImages[Math.floor(Math.random()*correctImages.length)]: wrongImage;
+    img.style.visibility='hidden';
+    dw.classList.remove('opened');
+  });
 }
 
-// ====== 開門 ======
 function openDoor(idx){
   if(busy) return;
-  busy=true;
+  busy=true; overlay.classList.add('show');
+  const chosen=doors[idx];
+  chosen.classList.add('opened');
+  const img=chosen.querySelector('.doorBack img');
+  img.style.visibility='visible';
+  const isWrong=img.src.includes(wrongImage);
 
-  const door=doors[idx];
-  const img =door.querySelector("img");
-
-  // 動畫：開始開門
-  door.classList.add("opened");
-
-  // 1.2 秒後門翻到一半 → 顯示圖片
-  setTimeout(()=>{ img.style.visibility="visible"; },1200);
-
-  const isWrong=img.src.includes("wrong/");
-  if(isWrong) lives--;
+  if(isWrong){ lives=Math.max(0,lives-1); resultBigEl.textContent='❌'; } 
+  else { resultBigEl.textContent='🤡'; correctCount++; }
 
   renderLives();
 
-  // 等門完全翻完
   setTimeout(()=>{
-
-    if(isWrong && lives<=0){
-      showEnding("GAME OVER",()=>{
-        round=0; lives=3;
-        showStory(storyLose, setupRound);
-      });
+    if(lives<=0){ 
+      showGameEnd('Game Over', () => showStory(storyLose, ()=>{
+        playAgainBtn.style.display='inline-block';
+        overlay.classList.remove('show');
+        busy=true;
+      }));
+    } else if(round>=maxRounds){ 
+      showGameEnd('WIN', () => showStory(storyWin, ()=>{
+        createFireworks();
+        playAgainBtn.style.display='inline-block';
+        overlay.classList.remove('show');
+        busy=true;
+      }));
+    } else {
+      busy=false; overlay.classList.remove('show'); setupRound();
     }
-    else if(!isWrong && round>=6){
-      showEnding("WIN",()=>{
-        round=0; lives=3;
-        showStory(storyWin, setupRound);
-      });
-    }
-    else{
-      setupRound();
-    }
-
-  },2000);
+  },600);
 }
 
-// ====== 每回合 ======
-function setupRound(){
-  round++; renderRound(); renderLives();
-  busy=false;
-
-  // 門關起來
-  doors.forEach(d=>{
-    d.classList.remove("opened");
-  });
-
-  // **門完全關好後**再換下一張（這就是你要的）
-  setTimeout(()=>{
-    prepareImages();
-  },300); 
+function resetGame(){
+  round=0; correctCount=0; lives=3; playAgainBtn.style.display='none';
+  resultBigEl.textContent=''; resultBigEl.style.fontSize='60px'; resultBigEl.style.color='red';
+  showStory(storyStart, ()=>{ setupRound(); });
+  overlay.classList.remove('show');
 }
 
-// ====== 劇情 ======
-function showStory(arr, callback){
-  gameStage.style.display="none";
-  overlay.classList.add("show");
+function showGameEnd(text, callback) {
+  gameEndDiv.textContent = text;
+  gameEndDiv.style.display = 'flex';
+  setTimeout(() => {
+    gameEndDiv.style.display = 'none';
+    callback();
+  }, 2000); // 顯示2秒
+}
 
-  let i=0;
-  storyImg.src=arr[i];
-
-  overlay.onclick=function(){
-    i++;
-    if(i>=arr.length){
-      overlay.classList.remove("show");
-      overlay.onclick=null;
-      gameStage.style.display="flex";
+function showStory(images, callback) {
+  if (images.length === 0) { callback(); return; }
+  storyDiv.style.display = 'flex';
+  let idx = 0;
+  function next() {
+    if (idx >= images.length) {
+      storyDiv.style.display = 'none';
       callback();
-    }else{
-      storyImg.src=arr[i];
+      return;
     }
+    storyImg.src = images[idx];
+    storyImg.onload = () => {
+      idx++;
+      setTimeout(next, 2000); // 每張圖片顯示2秒
+    };
+    storyImg.onerror = () => {
+      console.log('圖片載入失敗:', images[idx]);
+      idx++;
+      next(); // 跳過失敗的圖片
+    };
+  }
+  next();
+}
+
+doors.forEach((d,i)=> d.addEventListener('click',()=>openDoor(i)));
+playAgainBtn.addEventListener('click',resetGame);
+restartBtn.addEventListener('click',resetGame);
+
+function createFireworks(){
+  for(let i=0;i<30;i++){
+    const f=document.createElement('div');
+    f.className='firework';
+    f.style.setProperty('--dx',(Math.random()*600-300)+'px');
+    f.style.setProperty('--dy',(-Math.random()*400)+'px');
+    f.style.background=['#ff0044','#ffcc00','#00ffcc'][Math.floor(Math.random()*3)];
+    resultBigEl.appendChild(f);
+    setTimeout(()=>{ f.remove(); },1000);
   }
 }
 
-// ====== 結局 ======
-function showEnding(text, next){
-  endingText.textContent=text;
-  endingScreen.classList.add("show");
-  endingScreen.onclick=function(){
-    endingScreen.classList.remove("show");
-    endingScreen.onclick=null;
-    next();
-  }
-}
-
-// ====== 遊戲開始 ======
-doors.forEach((d,i)=>d.addEventListener("click",()=>openDoor(i)));
-
-showStory(storyStart, setupRound);
+resetGame();
 </script>
 </body>
 </html>
