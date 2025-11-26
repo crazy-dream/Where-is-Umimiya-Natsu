@@ -25,36 +25,26 @@ body{
   user-select:none;
 }
 header{margin-top:18px;text-align:center;}
-h1{margin:0;font-size:28px;letter-spacing:1px;}
+h1{margin:0;font-size:28px;}
 .stage-container{
   position:relative; width:100%; display:flex; justify-content:center;
 }
 .topLeft{
-  position:absolute; top:10px; left:10px; font-weight:800; font-size:20px; background: rgba(255,255,255,0.6); padding:6px 12px; border-radius:10px;
+  position:absolute; top:10px; left:10px; font-weight:800; font-size:20px;
+  background: rgba(255,255,255,0.6); padding:6px 12px; border-radius:10px;
 }
 .topRight{
   position:absolute; top:10px; right:10px; display:flex; gap:8px; align-items:center;
 }
-.lifeDot{width:28px;height:28px;border-radius:50%;background:var(--accent);box-shadow:0 4px 10px rgba(0,0,0,0.15);}
+.lifeDot{width:28px;height:28px;border-radius:50%;background:var(--accent);}
 .lifeDot.hidden{opacity:0.15;}
-.stage{
-  width:92%; max-width:980px;
-  display:flex; flex-direction:column;
-  align-items:center; gap:18px;
-  margin-bottom:40px;
-}
-.doors{
-  display:flex; gap:36px;
-  justify-content:center;
-  align-items:flex-start;
-  width:100%;
-}
-.doorWrap{
-  width:520px;
-  height:360px;
-  perspective:1200px;
-  position:relative;
-}
+
+.stage{ width:92%; max-width:980px; display:flex; flex-direction:column; align-items:center; gap:18px; margin-bottom:40px; }
+
+.doors{ display:flex; gap:36px; justify-content:center; align-items:flex-start; width:100%; }
+
+.doorWrap{ width:520px; height:360px; perspective:1200px; position:relative; }
+
 .doorFront{
   width:100%; height:100%; border-radius:18px;
   background:linear-gradient(180deg,var(--door-front),var(--door));
@@ -62,239 +52,215 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   transform-origin: top center;
   transform: rotateX(0deg);
   transition: transform 1.8s cubic-bezier(.2,.8,.2,1);
-  box-shadow:0 14px 30px rgba(0,0,0,0.15);
   position:absolute; top:0; left:0; z-index:5;
 }
 .dotMark{
   width:60px;height:60px;border-radius:50%;
   background:var(--accent); display:flex;
-  align-items:center;justify-content:center;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+  align-items:center; justify-content:center;
 }
 .doorBack{
-  width:100%; height:100%;
-  border-radius:18px;
-  background:white;
-  overflow:hidden;
-  position:absolute;
-  top:0; left:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:1;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
+  width:100%; height:100%; border-radius:18px;
+  background:white; overflow:hidden;
+  position:absolute; top:0; left:0; z-index:1;
 }
-.doorBack img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;
-  padding:8px;
-  visibility: hidden;
-}
+.doorBack img{ width:100%; height:100%; object-fit:contain; display:block; padding:8px; visibility:hidden; }
 .opened .doorFront{ transform: rotateX(-180deg); }
+
 .overlay{
-  position:fixed;left:0;top:0;right:0;bottom:0;
+  position:fixed; left:0; top:0; right:0; bottom:0;
   background:rgba(255,255,255,0.97);
-  display:none;
-  z-index:999;
-  justify-content:center; 
-  align-items:center;
-  cursor:pointer;
-}
-.overlay img{
-  width:100vw;
-  height:100vh;
-  object-fit:cover;
+  display:none; justify-content:center; align-items:center;
+  z-index:999; cursor:pointer;
 }
 .overlay.show{ display:flex; }
-.tapHint{
-  position:absolute;
-  bottom:30px;
-  color:black;
-  background:rgba(255,255,255,0.7);
-  padding:10px 20px;
-  border-radius:8px;
-  font-size:22px;
-  font-weight:700;
-}
+.overlay img{ width:100vw;height:100vh;object-fit:cover; }
+.tapHint{ position:absolute; bottom:30px; background:white; padding:10px 20px; border-radius:8px; }
+
 #endingScreen{
-  position:fixed;
-  left:0;top:0;right:0;bottom:0;
-  background:var(--bg);
-  display:none;
-  z-index:2000;
-  justify-content:center;
-  align-items:center;
-  cursor:pointer;
+  position:fixed; left:0; top:0; right:0; bottom:0;
+  display:none; justify-content:center; align-items:center;
+  background:var(--bg); z-index:2000; cursor:pointer;
 }
 #endingScreen.show{ display:flex; }
 #endingText{
-  font-size:110px;
-  font-weight:900;
-  color:red;
-  text-shadow:0 0 12px rgba(0,0,0,0.5);
+  font-size:110px; font-weight:900; color:red;
+  text-shadow:0 0 12px rgba(0,0,0,0.6);
 }
 </style>
 </head>
 <body>
 <header><h1>猜猜小丑在哪裡</h1></header>
+
 <div class="stage-container">
   <div class="topLeft" id="roundNum">0</div>
   <div class="topRight" id="lives"></div>
 </div>
+
 <section class="stage" id="gameStage">
   <div class="doors">
     <div class="doorWrap" id="door0">
-      <div class="doorBack"><img src="" alt="" /></div>
+      <div class="doorBack"><img src=""></div>
       <div class="doorFront"><div class="dotMark"></div></div>
     </div>
     <div class="doorWrap" id="door1">
-      <div class="doorBack"><img src="" alt="" /></div>
+      <div class="doorBack"><img src=""></div>
       <div class="doorFront"><div class="dotMark"></div></div>
     </div>
   </div>
 </section>
 
 <div class="overlay" id="overlay">
-  <img src="" id="storyImg">
+  <img id="storyImg">
   <div class="tapHint">點擊任意位置繼續</div>
 </div>
 
 <div id="endingScreen"><div id="endingText"></div></div>
 
 <script>
+// ====== 資源 ======
 const storyStart=["./story/洋芋片1.jpg","./story/洋芋片2.jpg","./story/洋芋片3.jpg","./story/洋芋片4.jpg","./story/洋芋片5.jpg","./story/洋芋片6.jpg"];
-const storyWin=["./story/洋芋片8.jpg","./story/洋芋片9.jpg"];
-const storyLose=["./story/洋芋片7.jpg","./story/洋芋片8.jpg","./story/洋芋片9.jpg"];
+const storyWin  =["./story/洋芋片8.jpg","./story/洋芋片9.jpg"];
+const storyLose =["./story/洋芋片7.jpg","./story/洋芋片8.jpg","./story/洋芋片9.jpg"];
 
 const correctImages=[
-  "./joker/1.png","./joker/1000018658.jpeg","./joker/1000018659.jpeg","./joker/2.png","./joker/3.png",
-  "./joker/4 (2).png","./joker/4.png","./joker/5.png","./joker/546175134_1138063744950693_180659281319095751_n.jpg",
-  "./joker/Am I (1).jpg","./joker/Am I (2).jpg","./joker/Am I (3).jpg","./joker/Am I (4).jpg","./joker/Am I.jpg",
-  "./joker/I am joker. (1).jpg","./joker/I am joker. (2).jpg","./joker/I am joker. (3).jpg",
-  "./joker/I am joker. 的複本 (1).jpg","./joker/I am joker..jpg","./joker/I am joker..png",
-  "./joker/IMG_20250806_193336_118.jpg","./joker/IMG_20251001_224237_440.jpg","./joker/IMG_20251118_213550_407.jpg",
-  "./joker/unnamed (1).webp","./joker/unnamed (2).webp","./joker/unnamed (4).webp","./joker/unnamed.webp",
-  "./joker/未命名設計.jpg","./joker/未命名設計.png"
+  "./joker/1.png","./joker/1000018658.jpeg","./joker/1000018659.jpeg",
+  "./joker/2.png","./joker/3.png","./joker/4.png",
+  "./joker/Am I (1).jpg","./joker/Am I (2).jpg","./joker/Am I (3).jpg",
+  "./joker/I am joker..jpg","./joker/IMG_20251118_213550_407.jpg"
 ];
 const wrongImage="./wrong/Ri86b7h.jpg";
 
-const maxRounds=6;
+// ====== 狀態 ======
 let round=0, lives=3, busy=false, currentCorrectDoor=0;
-const doors=[document.getElementById('door0'),document.getElementById('door1')];
-const roundNumEl=document.getElementById('roundNum');
-const livesEl=document.getElementById('lives');
-const overlay=document.getElementById('overlay');
-const storyImg=document.getElementById('storyImg');
-const gameStage=document.getElementById('gameStage');
-const endingScreen=document.getElementById('endingScreen');
-const endingText=document.getElementById('endingText');
 
-function renderLives(){
-  livesEl.innerHTML='';
-  for(let i=0;i<lives;i++){
-    const d=document.createElement('div');
-    d.className='lifeDot';
-    livesEl.appendChild(d);
-  }
-  for(let i=lives;i<3;i++){
-    const d=document.createElement('div');
-    d.className='lifeDot hidden';
-    livesEl.appendChild(d);
-  }
-}
+const doors=[document.getElementById("door0"),document.getElementById("door1")];
+const roundNumEl=document.getElementById("roundNum");
+const livesEl=document.getElementById("lives");
+const gameStage=document.getElementById("gameStage");
+const overlay=document.getElementById("overlay");
+const storyImg=document.getElementById("storyImg");
+const endingScreen=document.getElementById("endingScreen");
+const endingText=document.getElementById("endingText");
+
+// ====== UI ======
 function renderRound(){ roundNumEl.textContent=round; }
-
-function showStorySequence(images, callback){
-  gameStage.style.display='none';
-  overlay.classList.add('show');
-
-  let idx=0;
-  storyImg.src = images[idx];
-
-  overlay.onclick = function(){
-    idx++;
-    if(idx >= images.length){
-      overlay.classList.remove('show');
-      overlay.onclick = null;
-      gameStage.style.display='flex';
-      callback();
-    } else {
-      storyImg.src = images[idx];
-    }
+function renderLives(){
+  livesEl.innerHTML="";
+  for(let i=0;i<3;i++){
+    const d=document.createElement("div");
+    d.className="lifeDot" + (i<lives?"":" hidden");
+    livesEl.appendChild(d);
   }
 }
 
-function showEnding(text, after){
-  endingText.textContent = text;
-  endingScreen.classList.add('show');
-  endingScreen.onclick = function(){
-    endingScreen.onclick = null;
-    endingScreen.classList.remove('show');
-    after();
-  }
+// ====== 最重要的修正：門關起後才換圖片 ======
+function prepareImages(){
+  // 先把圖片塞到門後，但保持看不到（visibility: hidden）
+  currentCorrectDoor=Math.random()<0.5?0:1;
+  const good=doors[currentCorrectDoor].querySelector("img");
+  const bad =doors[1-currentCorrectDoor].querySelector("img");
+
+  good.src=correctImages[Math.floor(Math.random()*correctImages.length)];
+  bad.src=wrongImage;
+
+  good.style.visibility="hidden";
+  bad.style.visibility="hidden";
 }
 
-doors.forEach((d,i)=> d.addEventListener('click',()=> openDoor(i)));
-
-function setupRound(){
-  round++; renderRound(); renderLives(); busy=false;
-
-  currentCorrectDoor = Math.random()<0.5?0:1;
-
-  doors.forEach(dw=>{
-    const img = dw.querySelector('.doorBack img');
-    img.src = "";
-    img.style.visibility = 'hidden';
-    dw.classList.remove('opened');
-  });
-
-  const good = doors[currentCorrectDoor].querySelector('.doorBack img');
-  const bad  = doors[1-currentCorrectDoor].querySelector('.doorBack img');
-  good.src = correctImages[Math.floor(Math.random()*correctImages.length)];
-  bad.src  = wrongImage;
-}
-
+// ====== 開門 ======
 function openDoor(idx){
   if(busy) return;
-  busy = true;
+  busy=true;
 
-  const chosen = doors[idx];
-  const img = chosen.querySelector('.doorBack img');
+  const door=doors[idx];
+  const img =door.querySelector("img");
 
-  chosen.classList.add('opened');
+  // 動畫：開始開門
+  door.classList.add("opened");
 
-  // 門動畫 1.8 秒後顯示圖片
-  setTimeout(()=>{
-    img.style.visibility = 'visible';
-  }, 1800);
+  // 1.2 秒後門翻到一半 → 顯示圖片
+  setTimeout(()=>{ img.style.visibility="visible"; },1200);
 
-  const isWrong = img.src.includes("/wrong/");
+  const isWrong=img.src.includes("wrong/");
   if(isWrong) lives--;
+
   renderLives();
 
-  const delay = 2000;
+  // 等門完全翻完
   setTimeout(()=>{
+
     if(isWrong && lives<=0){
-      showEnding("GAME OVER", ()=>{
-        round = 0; lives = 3;
-        showStorySequence(storyLose, setupRound);
+      showEnding("GAME OVER",()=>{
+        round=0; lives=3;
+        showStory(storyLose, setupRound);
       });
-    } else if(!isWrong && round>=maxRounds){
-      showEnding("WIN", ()=>{
-        round = 0; lives = 3;
-        showStorySequence(storyWin, setupRound);
+    }
+    else if(!isWrong && round>=6){
+      showEnding("WIN",()=>{
+        round=0; lives=3;
+        showStory(storyWin, setupRound);
       });
-    } else {
-      busy = false;
+    }
+    else{
       setupRound();
     }
-  }, delay);
+
+  },2000);
 }
 
-// 啟動遊戲
-showStorySequence(storyStart, setupRound);
+// ====== 每回合 ======
+function setupRound(){
+  round++; renderRound(); renderLives();
+  busy=false;
+
+  // 門關起來
+  doors.forEach(d=>{
+    d.classList.remove("opened");
+  });
+
+  // **門完全關好後**再換下一張（這就是你要的）
+  setTimeout(()=>{
+    prepareImages();
+  },300); 
+}
+
+// ====== 劇情 ======
+function showStory(arr, callback){
+  gameStage.style.display="none";
+  overlay.classList.add("show");
+
+  let i=0;
+  storyImg.src=arr[i];
+
+  overlay.onclick=function(){
+    i++;
+    if(i>=arr.length){
+      overlay.classList.remove("show");
+      overlay.onclick=null;
+      gameStage.style.display="flex";
+      callback();
+    }else{
+      storyImg.src=arr[i];
+    }
+  }
+}
+
+// ====== 結局 ======
+function showEnding(text, next){
+  endingText.textContent=text;
+  endingScreen.classList.add("show");
+  endingScreen.onclick=function(){
+    endingScreen.classList.remove("show");
+    endingScreen.onclick=null;
+    next();
+  }
+}
+
+// ====== 遊戲開始 ======
+doors.forEach((d,i)=>d.addEventListener("click",()=>openDoor(i)));
+
+showStory(storyStart, setupRound);
 </script>
 </body>
 </html>
