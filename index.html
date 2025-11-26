@@ -26,27 +26,25 @@ body{
 }
 header{margin-top:18px;text-align:center;}
 h1{margin:0;font-size:28px;letter-spacing:1px;}
-
-/* topRow 固定位置，避免門擋住 */
+.topRow{
+  width:92%; max-width:980px;
+  display:flex;
+  justify-content:flex-end; /* 移到右上角 */
+  align-items:center;
+  margin-top:14px;margin-bottom:6px;
+  padding:0 10px;
+}
 #roundNum{
-  position: fixed;
-  top:20px;
-  left:20px;
   font-weight:800;font-size:20px;
   background: rgba(255,255,255,0.6);
   padding:6px 12px;
   border-radius:10px;
   color:var(--text);
-  z-index:2000;
 }
 #lives{
-  position: fixed;
-  top:20px;
-  right:20px;
   display:flex;
   gap:8px;
   align-items:center;
-  z-index:2000;
 }
 .lifeDot{
   width:28px;height:28px;border-radius:50%;
@@ -54,7 +52,6 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   box-shadow:0 4px 10px rgba(0,0,0,0.15);
 }
 .lifeDot.hidden{opacity:0.15;}
-
 .stage{
   width:92%; max-width:980px;
   display:flex;
@@ -94,8 +91,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 }
 .dotMark{
   width:60px;height:60px;border-radius:50%;
-  background:var(--accent);
-  display:flex;
+  background:var(--accent); display:flex;
   align-items:center;justify-content:center;
   box-shadow: 0 6px 16px rgba(0,0,0,0.18);
 }
@@ -121,18 +117,13 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   visibility: hidden;
 }
 .opened .doorFront{ transform: rotateX(-180deg); }
-
-/* WIN / Game Over 大字顯示在畫面中央 */
 #resultBig{
-  position: fixed;
-  top:50%;
-  left:50%;
-  transform: translate(-50%, -50%);
-  font-size:80px;
+  margin-top:6px;
+  font-size:60px;
   font-weight:900;
   color:red;
   text-align:center;
-  z-index:1500;
+  position:relative;
 }
 .firework{
   position:absolute;
@@ -146,13 +137,20 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   0%{transform:translate(0,0); opacity:1;}
   100%{transform:translate(var(--dx,0px),var(--dy,0px)); opacity:0;}
 }
-
+#controls{ margin-top:14px; display:flex; gap:12px; align-items:center; }
+.btn{
+  padding:10px 14px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.9);
+  border:1px solid rgba(0,0,0,0.06);
+  font-weight:800;
+  cursor:pointer;
+}
 .overlay{
   position:fixed;left:0;top:0;right:0;bottom:0;
-  z-index:1000; display:none;
+  z-index:999; display:none;
 }
 .overlay.show{ display:block; }
-
 @media(max-width:860px){
   .doorWrap{ width:86vw; height:50vw; }
 }
@@ -162,10 +160,10 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 <header>
   <h1>猜猜小丑在哪裡</h1>
 </header>
-
-<div id="roundNum">0</div>
-<div id="lives"></div>
-
+<div class="topRow">
+  <div id="roundNum">0</div>
+  <div id="lives"></div>
+</div>
 <section class="stage">
   <div class="doors">
     <div class="doorWrap" id="door0">
@@ -178,10 +176,12 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
     </div>
   </div>
   <div id="resultBig"></div>
+  <div id="controls">
+    <button class="btn" id="playAgain" style="display:none">再玩一次</button>
+    <button class="btn" id="restartBtn">重置遊戲</button>
+  </div>
 </section>
-
 <div class="overlay" id="overlay"></div>
-
 <script>
 const correctImages = [
     "1.png","1000018658.jpeg","1000018659.jpeg","2.png","3.png",
@@ -201,6 +201,8 @@ const doors = [document.getElementById('door0'),document.getElementById('door1')
 const roundNumEl = document.getElementById('roundNum');
 const livesEl = document.getElementById('lives');
 const resultBigEl = document.getElementById('resultBig');
+const playAgainBtn = document.getElementById('playAgain');
+const restartBtn = document.getElementById('restartBtn');
 const overlay = document.getElementById('overlay');
 
 function renderLives(){
@@ -241,6 +243,7 @@ function openDoor(idx){
       resultBigEl.textContent='Game Over';
       resultBigEl.style.fontSize='80px';
       resultBigEl.style.color='red';
+      playAgainBtn.style.display='inline-block';
       overlay.classList.remove('show');
       busy=true;
     } else if(round>=maxRounds){ 
@@ -248,6 +251,7 @@ function openDoor(idx){
       resultBigEl.style.fontSize='80px';
       resultBigEl.style.color='red';
       createFireworks();
+      playAgainBtn.style.display='inline-block';
       overlay.classList.remove('show');
       busy=true;
     } else {
@@ -256,7 +260,16 @@ function openDoor(idx){
   },600);
 }
 
+function resetGame(){
+  round=0; correctCount=0; lives=3; playAgainBtn.style.display='none';
+  resultBigEl.textContent=''; resultBigEl.style.fontSize='60px'; resultBigEl.style.color='red';
+  setupRound();
+  overlay.classList.remove('show');
+}
+
 doors.forEach((d,i)=> d.addEventListener('click',()=>openDoor(i)));
+playAgainBtn.addEventListener('click',resetGame);
+restartBtn.addEventListener('click',resetGame);
 
 function createFireworks(){
   for(let i=0;i<30;i++){
@@ -270,7 +283,7 @@ function createFireworks(){
   }
 }
 
-setupRound();
+resetGame();
 </script>
 </body>
 </html>
