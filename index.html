@@ -26,32 +26,32 @@ body{
 }
 header{margin-top:18px;text-align:center;}
 h1{margin:0;font-size:28px;letter-spacing:1px;}
+
+/* ⬅➡ 將 Round & Life 拉到左右兩側 */
 .topRow{
   width:92%; max-width:980px;
   display:flex;
   justify-content:space-between;
   align-items:center;
   margin-top:14px;margin-bottom:6px;
-  padding:0 10px;
+  padding:0 20px;
 }
 #roundNum{
-  font-weight:800;font-size:20px;
+  font-weight:800;font-size:26px;
   background: rgba(255,255,255,0.6);
-  padding:6px 12px;
-  border-radius:10px;
-  color:var(--text);
+  padding:10px 20px;
+  border-radius:12px;
 }
 #lives{
-  display:flex;
-  gap:8px;
-  align-items:center;
+  display:flex; gap:12px; align-items:center;
 }
 .lifeDot{
-  width:28px;height:28px;border-radius:50%;
+  width:30px;height:30px;border-radius:50%;
   background:var(--accent);
   box-shadow:0 4px 10px rgba(0,0,0,0.15);
 }
 .lifeDot.hidden{opacity:0.15;}
+
 .stage{
   width:92%; max-width:980px;
   display:flex;
@@ -60,6 +60,8 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   gap:18px;
   margin-bottom:40px;
 }
+
+/* 🧨 門區 */
 .doors{
   display:flex;
   gap:36px;
@@ -74,98 +76,70 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
   position:relative;
 }
 .doorFront{
-  width:100%;
-  height:100%;
+  width:100%;height:100%;
   border-radius:18px;
   background:linear-gradient(180deg,var(--door-front),var(--door));
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  display:flex;justify-content:center;align-items:center;
   transform-origin: top center;
   transform: rotateX(0deg);
   transition: transform 1s cubic-bezier(.2,.8,.2,1);
   box-shadow:0 14px 30px rgba(0,0,0,0.15);
-  position:absolute;
-  top:0; left:0;
-  z-index:5;
+  position:absolute;top:0;left:0;z-index:5;
 }
 .dotMark{
   width:60px;height:60px;border-radius:50%;
   background:var(--accent);
-  display:flex;
-  align-items:center;justify-content:center;
   box-shadow: 0 6px 16px rgba(0,0,0,0.18);
 }
 .doorBack{
-  width:100%; height:100%;
+  width:100%;height:100%;
   border-radius:18px;
   background:white;
   overflow:hidden;
-  position:absolute;
-  top:0; left:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  position:absolute;top:0;left:0;
+  display:flex;align-items:center;justify-content:center;
   z-index:1;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
 }
 .doorBack img{
-  width:100%;
-  height:100%;
+  width:100%;height:100%;
   object-fit:contain;
-  display:block;
   padding:8px;
-  visibility: hidden;
+  visibility:hidden;
 }
 .opened .doorFront{ transform: rotateX(-180deg); }
 
-#controls{ margin-top:14px; display:flex; gap:12px; align-items:center; }
-.btn{
-  padding:10px 14px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.9);
-  border:1px solid rgba(0,0,0,0.06);
-  font-weight:800;
-  cursor:pointer;
-}
-
-/* ★★★★★ NEW：結果畫面（另一畫面） ★★★★★ */
-#resultScreen{
+/* 🎌 第二畫面：WIN / GAME OVER */
+.fullscreenMsg{
   position:fixed;
   left:0;top:0;right:0;bottom:0;
-  background:rgba(0,0,0,0.85);
-  z-index:2000;
-  display:none;
-  flex-direction:column;
+  background:rgba(0,0,0,0.75);
+  display:flex;
   justify-content:center;
   align-items:center;
+  z-index:2000;
   color:red;
-  text-align:center;
-}
-#resultText{
-  font-size:100px;
+  font-size:90px;
   font-weight:900;
-  margin-bottom:40px;
+  display:none;
 }
 
+/*✨ 煙火 */
 .firework{
   position:absolute;
-  width:6px;
-  height:6px;
-  border-radius:50%;
+  width:6px;height:6px;border-radius:50%;
   background:#ff0044;
   animation: fireAnim 1s ease-out infinite;
 }
 @keyframes fireAnim{
-  0%{transform:translate(0,0); opacity:1;}
-  100%{transform:translate(var(--dx,0px),var(--dy,0px)); opacity:0;}
+  0%{transform:translate(0,0);opacity:1;}
+  100%{transform:translate(var(--dx,0px),var(--dy,0px));opacity:0;}
 }
 
 .overlay{
   position:fixed;left:0;top:0;right:0;bottom:0;
-  z-index:999; display:none;
+  z-index:999;display:none;
 }
-.overlay.show{ display:block; }
+.overlay.show{display:block;}
 
 @media(max-width:860px){
   .doorWrap{ width:86vw; height:50vw; }
@@ -174,9 +148,7 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 </head>
 <body>
 
-<header>
-  <h1>猜猜小丑在哪裡</h1>
-</header>
+<header><h1>猜猜小丑在哪裡</h1></header>
 
 <div class="topRow">
   <div id="roundNum">0</div>
@@ -186,27 +158,20 @@ h1{margin:0;font-size:28px;letter-spacing:1px;}
 <section class="stage">
   <div class="doors">
     <div class="doorWrap" id="door0">
-      <div class="doorBack"><img src="" alt=""></div>
+      <div class="doorBack"><img src=""></div>
       <div class="doorFront"><div class="dotMark"></div></div>
     </div>
     <div class="doorWrap" id="door1">
-      <div class="doorBack"><img src="" alt=""></div>
+      <div class="doorBack"><img src=""></div>
       <div class="doorFront"><div class="dotMark"></div></div>
     </div>
-  </div>
-  <div id="controls">
-    <button class="btn" id="playAgain" style="display:none">再玩一次</button>
-    <button class="btn" id="restartBtn">重置遊戲</button>
   </div>
 </section>
 
 <div class="overlay" id="overlay"></div>
 
-<!-- ★★★★★ NEW：結果畫面 ★★★★★ -->
-<div id="resultScreen">
-  <div id="resultText"></div>
-  <button class="btn" id="resultRestart">再玩一次</button>
-</div>
+<!-- 🎉 另一畫面 -->
+<div id="finalScreen" class="fullscreenMsg"></div>
 
 <script>
 const correctImages = [
@@ -222,50 +187,42 @@ const correctImages = [
 const wrongImage = "Ri86b7h.jpg";
 
 const maxRounds = 6;
-let round = 0, correctCount = 0, lives=3, busy=false;
+let round = 0, lives=3, busy=false;
 
-const doors = [document.getElementById('door0'),document.getElementById('door1')];
+const doors = [document.getElementById('door0'), document.getElementById('door1')];
 const roundNumEl = document.getElementById('roundNum');
 const livesEl = document.getElementById('lives');
 const overlay = document.getElementById('overlay');
-
-const resultScreen = document.getElementById('resultScreen');
-const resultText = document.getElementById('resultText');
-const resultRestart = document.getElementById('resultRestart');
+const finalScreen = document.getElementById('finalScreen');
 
 function renderLives(){
   livesEl.innerHTML='';
-  for(let i=0;i<lives;i++){
-    const d=document.createElement('div');
-    d.className='lifeDot';
+  for(let i=0;i<lives;i++){ 
+    const d=document.createElement('div'); d.className='lifeDot'; 
     livesEl.appendChild(d);
   }
-  for(let i=lives;i<3;i++){
-    const d=document.createElement('div');
-    d.className='lifeDot hidden';
+  for(let i=lives;i<3;i++){ 
+    const d=document.createElement('div'); d.className='lifeDot hidden'; 
     livesEl.appendChild(d);
   }
 }
-
-function renderRound(){
-  roundNumEl.textContent=round;
-}
+function renderRound(){ roundNumEl.textContent = round; }
 
 let currentCorrectDoor=0;
 
 function setupRound(){
-  round++;
-  renderRound(); 
-  renderLives(); 
-  busy=false;
+  if(round >= maxRounds || lives <= 0) return;
+  round++; renderRound(); renderLives(); busy=false;
   overlay.classList.remove('show');
+  finalScreen.style.display="none";
 
-  currentCorrectDoor=Math.random()<0.5?0:1;
+  currentCorrectDoor = Math.random()<0.5?0:1;
 
   doors.forEach((dw,idx)=>{
-    const img=dw.querySelector('.doorBack img');
-    img.src = (idx===currentCorrectDoor)? 
-      correctImages[Math.floor(Math.random()*correctImages.length)] : wrongImage;
+    const img = dw.querySelector('.doorBack img');
+    img.src = (idx===currentCorrectDoor)
+      ? correctImages[Math.floor(Math.random()*correctImages.length)]
+      : wrongImage;
     img.style.visibility='hidden';
     dw.classList.remove('opened');
   });
@@ -275,65 +232,52 @@ function openDoor(idx){
   if(busy) return;
   busy=true; overlay.classList.add('show');
 
-  const chosen=doors[idx];
-  chosen.classList.add('opened');
-  const img=chosen.querySelector('.doorBack img');
+  const door = doors[idx];
+  door.classList.add('opened');
+
+  const img = door.querySelector('.doorBack img');
   img.style.visibility='visible';
 
-  const isWrong = img.src.includes(wrongImage);
-
-  if(isWrong){
-    lives = Math.max(0, lives-1);
-  } else {
-    correctCount++;
-  }
-
+  if(img.src.includes(wrongImage)){ lives--; }
+  
   renderLives();
 
   setTimeout(()=>{
     if(lives<=0){
-      showResult("Game Over", false);
-    }
-    else if(round>=maxRounds){
-      showResult("WIN", true);
-    }
-    else{
-      busy=false;
-      overlay.classList.remove('show');
+      showFinal("GAME OVER");
+    } else if(round>=maxRounds){
+      showFinal("WIN");
+      createFireworks();
+    } else {
       setupRound();
     }
   },600);
 }
 
-/* ★★★★★ NEW — 顯示結果畫面 ★★★★★ */
-function showResult(text, isWin){
-  resultText.textContent = text;
-  resultScreen.style.display = "flex";
+function showFinal(text){
+  finalScreen.textContent = text;
+  finalScreen.style.display = "flex";
 
-  if(isWin) createFireworks();
+  setTimeout(()=>{
+    resetGame();
+  },1800);
 }
 
-/* ★★★★★ 再玩一次 ★★★★★ */
 function resetGame(){
-  round=0; correctCount=0; lives=3;
-  resultScreen.style.display="none";
-  overlay.classList.remove('show');
+  round=0; lives=3;
   setupRound();
 }
 
 doors.forEach((d,i)=> d.addEventListener('click',()=>openDoor(i)));
-resultRestart.addEventListener('click', resetGame);
-document.getElementById('restartBtn').addEventListener('click', resetGame);
 
-/* WIN 煙火 */
 function createFireworks(){
-  for(let i=0;i<40;i++){
+  for(let i=0;i<30;i++){
     const f=document.createElement('div');
     f.className='firework';
-    f.style.setProperty('--dx',(Math.random()*800-400)+'px');
-    f.style.setProperty('--dy',(-Math.random()*500)+'px');
+    f.style.setProperty('--dx',(Math.random()*600-300)+'px');
+    f.style.setProperty('--dy',(-Math.random()*400)+'px');
     f.style.background=['#ff0044','#ffcc00','#00ffcc'][Math.floor(Math.random()*3)];
-    resultScreen.appendChild(f);
+    finalScreen.appendChild(f);
     setTimeout(()=>{ f.remove(); },1000);
   }
 }
