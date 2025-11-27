@@ -13,126 +13,27 @@
   --red:#ff3b3b;
   --win:#1E90FF; /* WIN藍色 */
 }
-html,body{
-  height:100%;
-  margin:0;
-  font-family:"Microsoft JhengHei",sans-serif;
-  background:var(--bg);
-}
-.game-wrap{
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  padding:28px;
-  gap:18px;
-}
-header{
-  width:100%;
-  display:flex;
-  justify-content:center;
-  position:relative;
-}
+html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; background:var(--bg);}
+.game-wrap{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:28px; gap:18px;}
+header{width:100%; display:flex; justify-content:center; position:relative;}
 h1{margin:0;font-size:28px;}
-.level-badge{
-  position:absolute;
-  left:18px;
-  top:0;
-  padding:6px 10px;
-  border-radius:10px;
-  font-weight:700;
-  background:rgba(255,255,255,0.25);
-  backdrop-filter: blur(4px);
-}
-.lives{
-  position:absolute;
-  right:18px;
-  top:0;
-  display:flex;
-  gap:8px;
-}
-.life{
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  background:var(--red);
-}
-.life.empty{
-  background:#eee;
-  border:1px solid #aaa;
-}
-.stage{
-  display:flex;
-  gap:32px;
-  justify-content:center;
-  margin-top:20px;
-}
-.door-card{
-  width:540px;
-  height:420px;
-  background:var(--door);
-  border-radius:16px;
-  position:relative;
-  overflow:hidden;
-  cursor:pointer;
-}
-.reveal-area{
-  position:absolute;
-  inset:0;
-  z-index:1;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-.reveal-img{
-  max-width:100%;
-  max-height:100%;
-  object-fit:cover;
-}
-.panel{
-  position:absolute;
-  z-index:10;
-  width:50%;
-  top:0;
-  bottom:0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:60px;
-  color:white;
-  font-weight:900;
-  background:var(--door);
-  transition:0.75s;
-}
+.level-badge{position:absolute; left:18px; top:0; padding:6px 10px; border-radius:10px; font-weight:700; background:rgba(255,255,255,0.25); backdrop-filter: blur(4px);}
+.lives{position:absolute; right:18px; top:0; display:flex; gap:8px;}
+.life{width:18px; height:18px; border-radius:50%; background:var(--red);}
+.life.empty{background:#eee; border:1px solid #aaa;}
+.stage{display:flex; gap:32px; justify-content:center; margin-top:20px;}
+.door-card{width:540px; height:420px; background:var(--door); border-radius:16px; position:relative; overflow:hidden; cursor:pointer;}
+.reveal-area{position:absolute; inset:0; z-index:1; display:flex; justify-content:center; align-items:center;}
+.reveal-img{max-width:100%; max-height:100%; object-fit:cover;}
+.panel{position:absolute; z-index:10; width:50%; top:0; bottom:0; display:flex; justify-content:center; align-items:center; font-size:60px; color:white; font-weight:900; background:var(--door); transition:0.75s;}
 .panel.left{ left:0; }
 .panel.right{ right:0; }
 .door-card.open .panel.left{ transform:translateX(-100%); }
 .door-card.open .panel.right{ transform:translateX(100%); }
-.overlay{
-  position:fixed;
-  inset:0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:rgba(0,0,0,0);
-  pointer-events:none;
-  z-index:999;
-  transition:0.3s;
-}
-.overlay-message{
-  opacity:0;
-  font-size:70px;
-  font-weight:900;
-  color:red;
-  transition:0.3s;
-}
-.overlay.show{
-  background:rgba(0,0,0,0.65);
-  pointer-events:auto;
-}
-.overlay.show .overlay-message{
-  opacity:1;
-}
+.overlay{position:fixed; inset:0; display:flex; justify-content:center; align-items:center; background:rgba(0,0,0,0); pointer-events:none; z-index:999; transition:0.3s;}
+.overlay-message{opacity:0; font-size:70px; font-weight:900; color:red; transition:0.3s;}
+.overlay.show{background:rgba(0,0,0,0.65); pointer-events:auto;}
+.overlay.show .overlay-message{opacity:1;}
 </style>
 </head>
 <body>
@@ -167,12 +68,9 @@ h1{margin:0;font-size:28px;}
 </div>
 
 <script>
-let level = 1;
-let lives = 3;
-let jokerSide = "A";
-let lock = false;
+let level=1, lives=3, jokerSide="A", lock=false;
 
-const JOKER_IMAGES = [
+const JOKER_IMAGES=[
   "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png","joker/3.png",
   "joker/4 (2).png","joker/4.png","joker/5.png","joker/546175134_1138063744950693_180659281319095751_n.jpg",
   "joker/Am I (1).jpg","joker/Am I (2).jpg","joker/Am I (3).jpg","joker/Am I (4).jpg","joker/Am I.jpg",
@@ -183,44 +81,41 @@ const JOKER_IMAGES = [
   "joker/螢幕擷取畫面 2025-11-20 231953.png","joker/螢幕擷取畫面 2025-11-20 232248.png","joker/螢幕擷取畫面 2025-11-20 232410.png",
   "joker/螢幕擷取畫面 2025-11-20 232433.png","joker/螢幕擷取畫面 2025-11-20 232449.png","joker/螢幕擷取畫面 2025-11-20 233008.png"
 ];
-const FILLER_IMAGES = ["wrong/Ri86b7h.jpg"];
+const FILLER_IMAGES=["wrong/Ri86b7h.jpg"];
 
-const doorA = document.getElementById("doorA");
-const doorB = document.getElementById("doorB");
-const imgA = document.getElementById("imgA");
-const imgB = document.getElementById("imgB");
-const overlay = document.getElementById("overlay");
-const overlayMsg = document.getElementById("overlayMsg");
-const levelBadge = document.getElementById("levelBadge");
+const doorA=document.getElementById("doorA");
+const doorB=document.getElementById("doorB");
+const imgA=document.getElementById("imgA");
+const imgB=document.getElementById("imgB");
+const overlay=document.getElementById("overlay");
+const overlayMsg=document.getElementById("overlayMsg");
+const levelBadge=document.getElementById("levelBadge");
 
 function updateLives(){
   for(let i=1;i<=3;i++){
-    const el = document.getElementById("life"+i);
-    if(i <= lives) el.classList.remove("empty");
-    else el.classList.add("empty");
+    const el=document.getElementById("life"+i);
+    if(i<=lives) el.classList.remove("empty"); else el.classList.add("empty");
   }
 }
 
 function setRandomImages(){
-  jokerSide = Math.random() < 0.5 ? "A":"B";
-  const jokerImg = JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
-  const fillerImg = FILLER_IMAGES[0];
+  jokerSide=Math.random()<0.5?"A":"B";
+  const jokerImg=JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
+  const fillerImg=FILLER_IMAGES[0];
   if(jokerSide==="A"){ imgA.src=jokerImg; imgB.src=fillerImg; }
   else{ imgA.src=fillerImg; imgB.src=jokerImg; }
 }
 
 function setupLevel(first=false){
   document.querySelectorAll(".door-card").forEach(d=>d.classList.remove("open"));
-  lock = false;
-  levelBadge.textContent = `第${level}關`;
-  if(first){ // 第一次進遊戲要顯示圖片
-    setRandomImages();
-  }
+  lock=false;
+  levelBadge.textContent=`第${level}關`;
+  if(first) setRandomImages(); // 第一次進遊戲就顯示
 }
 
 function showGameOver(){
   overlay.classList.add("show");
-  overlayMsg.textContent = "GAME OVER";
+  overlayMsg.textContent="GAME OVER";
   overlayMsg.style.color="red";
 }
 
@@ -232,37 +127,37 @@ function showWin(){
 
 function clickDoor(side){
   if(lock) return;
-  lock = true;
-  const door = side==="A"?doorA:doorB;
+  lock=true;
+  const door=side==="A"?doorA:doorB;
   door.classList.add("open");
 
-  // 等門動畫結束，然後門收回，再換下一關圖片
+  // 門打開動畫完成
   setTimeout(()=>{
-    // 決定勝負
-    if(side===jokerSide){
-      level++;
-      if(level>6){ showWin(); return; }
-    }else{
-      lives--;
-      updateLives();
-      if(lives<=0){ showGameOver(); return; }
-    }
+    // 門保持一小段時間後關閉
+    door.classList.remove("open");
 
-    // 門完全關起來後再換下一關圖片
+    // 門完全關閉後再換下一關圖片
     setTimeout(()=>{
+      if(side===jokerSide){
+        level++;
+        if(level>6){ showWin(); return; }
+      }else{
+        lives--;
+        updateLives();
+        if(lives<=0){ showGameOver(); return; }
+      }
       setRandomImages();
-      document.querySelectorAll(".door-card").forEach(d=>d.classList.remove("open"));
-      lock = false;
-      levelBadge.textContent = `第${level}關`;
-    }, 300); // 門收回動畫時間
+      levelBadge.textContent=`第${level}關`;
+      lock=false;
+    },750); // 門關閉動畫時間
   },800); // 門打開動畫時間
 }
 
-doorA.onclick = ()=>clickDoor("A");
-doorB.onclick = ()=>clickDoor("B");
+doorA.onclick=()=>clickDoor("A");
+doorB.onclick=()=>clickDoor("B");
 
 updateLives();
-setupLevel(true); // true表示第一次進遊戲就顯示圖片
+setupLevel(true);
 </script>
 
 </body>
