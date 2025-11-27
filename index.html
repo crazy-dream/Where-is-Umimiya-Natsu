@@ -169,6 +169,7 @@ h1{margin:0;font-size:28px;}
 let level = 1;
 let lives = 3;
 let jokerSide = "A";
+let lock = false; // 🔒 點擊鎖定
 
 const JOKER_IMAGES = [
   "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png","joker/3.png",
@@ -202,14 +203,7 @@ function updateLives(){
 function setupLevel(){
   document.querySelectorAll(".door-card").forEach(d=>d.classList.remove("open"));
   jokerSide = Math.random() < 0.5 ? "A":"B";
-
-  /* ⭐ 每關隨機挑 Joker 圖片 */
-  const jokerImg = JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
-  const fillerImg = FILLER_IMAGES[0];
-
-  if(jokerSide==="A"){ imgA.src=jokerImg; imgB.src=fillerImg; }
-  else{ imgA.src=fillerImg; imgB.src=jokerImg; }
-
+  lock = false; // 🔓 解鎖
   levelBadge.textContent = `第${level}關`;
 }
 
@@ -226,10 +220,19 @@ function showWin(){
 }
 
 function clickDoor(side){
+  if(lock) return; // 鎖住就不處理
+  lock = true;      // 點擊後鎖住
   const door = side==="A"?doorA:doorB;
   door.classList.add("open");
 
   setTimeout(()=>{
+    // 🔹門開完再決定勝負，這裡才隨機挑圖
+    const jokerImg = JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
+    const fillerImg = FILLER_IMAGES[0];
+
+    if(jokerSide==="A"){ imgA.src=jokerImg; imgB.src=fillerImg; }
+    else{ imgA.src=fillerImg; imgB.src=jokerImg; }
+
     if(side===jokerSide){
       level++;
       if(level>6) showWin();
@@ -240,7 +243,7 @@ function clickDoor(side){
       if(lives<=0) showGameOver();
       else setupLevel();
     }
-  },800);
+  },800); // 門動畫時間
 }
 
 doorA.onclick = ()=>clickDoor("A");
