@@ -5,158 +5,133 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>猜猜小丑在哪裡</title>
 <style>
-  :root{
-    --bg:#bfe8ff;
-    --door:#3aa0ff;
-    --door-front:#2a84d6;
-    --accent:#ff4b6e;
-    --text:#002d59;
-    --red:#ff3b3b;
-  }
-  html,body{
-    height:100%;
-    margin:0;
-    font-family:"Microsoft JhengHei",sans-serif;
-    background:var(--bg);
-  }
-
-  .game-wrap{
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:28px;
-    gap:18px;
-  }
-
-  header{
-    width:100%;
-    display:flex;
-    justify-content:center;
-    position:relative;
-  }
-
-  h1{
-    margin:0;
-    font-size:28px;
-  }
-
-  /* 關卡 */
-  .level-badge{
-    position:absolute;
-    left:18px;
-    top:0;
-    padding:6px 10px;
-    border-radius:10px;
-    font-weight:700;
-    background:rgba(255,255,255,0.25);
-    backdrop-filter: blur(4px);
-  }
-
-  /* 命 */
-  .lives{
-    position:absolute;
-    right:18px;
-    top:0;
-    display:flex;
-    gap:8px;
-  }
-  .life{
-    width:18px;
-    height:18px;
-    border-radius:50%;
-    background:var(--red);
-  }
-  .life.empty{
-    background:#eee;
-    border:1px solid #aaa;
-  }
-
-  /* 門的區域 */
-  .stage{
-    display:flex;
-    gap:22px;
-    justify-content:center;
-    margin-top:10px;
-  }
-
-  .door-card{
-    width:420px;
-    height:320px;
-    background:linear-gradient(180deg,var(--door), var(--door-front));
-    border-radius:12px;
-    position:relative;
-    overflow:hidden;
-    cursor:pointer;
-  }
-
-  /* ↓↓↓ 這裡修正透明問題：圖片層放低 */
-  .reveal-area{
-    position:absolute;
-    inset:0;
-    z-index:1;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-  }
-  .reveal-img{
-    max-width:100%;
-    max-height:100%;
-    object-fit:cover;
-  }
-
-  /* ↓↓↓ 門板層變高，壓住圖片（不透明） */
-  .panel{
-    position:absolute;
-    z-index:10;
-    width:50%;
-    top:0;
-    bottom:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:48px;
-    color:white;
-    font-weight:900;
-    transition:0.7s;
-  }
-  .panel.left{ left:0; background:var(--door); }
-  .panel.right{ right:0; background:var(--door-front); }
-
-  .door-card.open .panel.left{ transform:translateX(-100%); }
-  .door-card.open .panel.right{ transform:translateX(100%); }
-
-  /* WIN / GAME OVER overlay */
-  .overlay{
-    position:fixed;
-    inset:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:rgba(0,0,0,0);
-    pointer-events:none;
-    z-index:999;
-    transition:0.3s;
-  }
-
-  /* ↓↓↓ 預設透明，解決 "文字一直出現" 問題 */
-  .overlay-message{
-    opacity:0;
-    font-size:70px;
-    font-weight:900;
-    color:red;
-    transition:0.3s;
-  }
-
-  /* 出現時才被看到 */
-  .overlay.show{
-    background:rgba(0,0,0,0.65);
-    pointer-events:auto;
-  }
-  .overlay.show .overlay-message{
-    opacity:1;
-  }
-
+:root{
+  --bg:#bfe8ff;
+  --door:#3aa0ff;
+  --accent:#ff4b6e;
+  --text:#002d59;
+  --red:#ff3b3b;
+}
+html,body{
+  height:100%;
+  margin:0;
+  font-family:"Microsoft JhengHei",sans-serif;
+  background:var(--bg);
+}
+.game-wrap{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:28px;
+  gap:18px;
+}
+header{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  position:relative;
+}
+h1{margin:0;font-size:28px;}
+.level-badge{
+  position:absolute;
+  left:18px;
+  top:0;
+  padding:6px 10px;
+  border-radius:10px;
+  font-weight:700;
+  background:rgba(255,255,255,0.25);
+  backdrop-filter: blur(4px);
+}
+.lives{
+  position:absolute;
+  right:18px;
+  top:0;
+  display:flex;
+  gap:8px;
+}
+.life{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:var(--red);
+}
+.life.empty{
+  background:#eee;
+  border:1px solid #aaa;
+}
+.stage{
+  display:flex;
+  gap:32px;
+  justify-content:center;
+  margin-top:20px;
+}
+.door-card{
+  width:540px;
+  height:420px;
+  background:var(--door);
+  border-radius:16px;
+  position:relative;
+  overflow:hidden;
+  cursor:pointer;
+}
+.reveal-area{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.reveal-img{
+  max-width:100%;
+  max-height:100%;
+  object-fit:cover;
+}
+.panel{
+  position:absolute;
+  z-index:10;
+  width:50%;
+  top:0;
+  bottom:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:60px;
+  color:white;
+  font-weight:900;
+  background:var(--door);
+  transition:0.75s;
+}
+.panel.left{ left:0; }
+.panel.right{ right:0; }
+.door-card.open .panel.left{ transform:translateX(-100%); }
+.door-card.open .panel.right{ transform:translateX(100%); }
+.overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,0);
+  pointer-events:none;
+  z-index:999;
+  transition:0.3s;
+}
+.overlay-message{
+  opacity:0;
+  font-size:70px;
+  font-weight:900;
+  color:red;
+  transition:0.3s;
+}
+.overlay.show{
+  background:rgba(0,0,0,0.65);
+  pointer-events:auto;
+}
+.overlay.show .overlay-message{
+  opacity:1;
+}
 </style>
 </head>
 <body>
@@ -184,11 +159,8 @@
       <div class="panel right">🤡</div>
     </div>
   </div>
-
-  <button onclick="restartGame()">重新開始</button>
 </div>
 
-<!-- overlay -->
 <div class="overlay" id="overlay">
   <div class="overlay-message" id="overlayMsg">GAME OVER</div>
 </div>
@@ -198,59 +170,26 @@ let level = 1;
 let lives = 3;
 let jokerSide = "A";
 
-  
-
 const JOKER_IMAGES = [
-  "joker/1.png",
-  "joker/1000018658.jpeg",
-  "joker/1000018659.jpeg",
-  "joker/2.png",
-  "joker/3.png",
-  "joker/4 (2).png",
-  "joker/4.png",
-  "joker/5.png",
-  "joker/546175134_1138063744950693_180659281319095751_n.jpg",
-  "joker/Am I (1).jpg",
-  "joker/Am I (2).jpg",
-  "joker/Am I (3).jpg",
-  "joker/Am I (4).jpg",
-  "joker/Am I.jpg",
-  "joker/I am joker. (1).jpg",
-  "joker/I am joker. (2).jpg",
-  "joker/I am joker. (3).jpg",
-  "joker/I am joker. 的複本 (1).jpg",
-  "joker/I am joker..jpg",
-  "joker/I am joker..png",
-  "joker/IMG_20250806_193336_118.jpg",
-  "joker/IMG_20251001_224237_440-removebg-preview.png",
-  "joker/IMG_20251118_213550_407.jpg",
-  "joker/unnamed (1).webp",
-  "joker/unnamed (2).webp",
-  "joker/unnamed (4).webp",
-  "joker/unnamed.webp",
-  "joker/未命名設計.jpg",
-  "joker/未命名設計.png",
-  "joker/螢幕擷取畫面 2025-11-20 231537.png",
-  "joker/螢幕擷取畫面 2025-11-20 231953.png",
-  "joker/螢幕擷取畫面 2025-11-20 232248.png",
-  "joker/螢幕擷取畫面 2025-11-20 232410.png",
-  "joker/螢幕擷取畫面 2025-11-20 232433.png",
-  "joker/螢幕擷取畫面 2025-11-20 232449.png",
-  "joker/螢幕擷取畫面 2025-11-20 233008.png"
+  "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png","joker/3.png",
+  "joker/4 (2).png","joker/4.png","joker/5.png","joker/546175134_1138063744950693_180659281319095751_n.jpg",
+  "joker/Am I (1).jpg","joker/Am I (2).jpg","joker/Am I (3).jpg","joker/Am I (4).jpg","joker/Am I.jpg",
+  "joker/I am joker. (1).jpg","joker/I am joker. (2).jpg","joker/I am joker. (3).jpg","joker/I am joker. 的複本 (1).jpg",
+  "joker/I am joker..jpg","joker/I am joker..png","joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440-removebg-preview.png",
+  "joker/IMG_20251118_213550_407.jpg","joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp",
+  "joker/unnamed.webp","joker/未命名設計.jpg","joker/未命名設計.png","joker/螢幕擷取畫面 2025-11-20 231537.png",
+  "joker/螢幕擷取畫面 2025-11-20 231953.png","joker/螢幕擷取畫面 2025-11-20 232248.png","joker/螢幕擷取畫面 2025-11-20 232410.png",
+  "joker/螢幕擷取畫面 2025-11-20 232433.png","joker/螢幕擷取畫面 2025-11-20 232449.png","joker/螢幕擷取畫面 2025-11-20 233008.png"
 ];
+const FILLER_IMAGES = ["wrong/Ri86b7h.jpg"];
 
-const FILLER_IMAGES = [
-  "wrong/Ri86b7h.jpg"
-];
-
-  
 const doorA = document.getElementById("doorA");
 const doorB = document.getElementById("doorB");
 const imgA = document.getElementById("imgA");
 const imgB = document.getElementById("imgB");
-
 const overlay = document.getElementById("overlay");
 const overlayMsg = document.getElementById("overlayMsg");
+const levelBadge = document.getElementById("levelBadge");
 
 function updateLives(){
   for(let i=1;i<=3;i++){
@@ -262,23 +201,28 @@ function updateLives(){
 
 function setupLevel(){
   document.querySelectorAll(".door-card").forEach(d=>d.classList.remove("open"));
-  
   jokerSide = Math.random() < 0.5 ? "A":"B";
-  const jokerImg = JOKER_IMAGES[level-1];
-  const fillerImg = FILLER_IMAGES[Math.floor(Math.random()*FILLER_IMAGES.length)];
 
-  if(jokerSide==="A"){ imgA.src = jokerImg; imgB.src = fillerImg; }
-  else{ imgA.src = fillerImg; imgB.src = jokerImg; }
+  /* ⭐ 每關隨機挑 Joker 圖片 */
+  const jokerImg = JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
+  const fillerImg = FILLER_IMAGES[0];
+
+  if(jokerSide==="A"){ imgA.src=jokerImg; imgB.src=fillerImg; }
+  else{ imgA.src=fillerImg; imgB.src=jokerImg; }
+
+  levelBadge.textContent = `第${level}關`;
 }
 
 function showGameOver(){
   overlay.classList.add("show");
   overlayMsg.textContent = "GAME OVER";
+  overlayMsg.style.color="red";
 }
+
 function showWin(){
   overlay.classList.add("show");
-  overlayMsg.textContent = "WIN";
-  overlayMsg.style.color = "lime";
+  overlayMsg.textContent="WIN";
+  overlayMsg.style.color="lime";
 }
 
 function clickDoor(side){
@@ -287,31 +231,20 @@ function clickDoor(side){
 
   setTimeout(()=>{
     if(side===jokerSide){
-      if(level===6){ showWin(); }
-      else{
-        level++;
-        setupLevel();
-      }
+      level++;
+      if(level>6) showWin();
+      else setupLevel();
     }else{
       lives--;
       updateLives();
-      if(lives<=0){ showGameOver(); }
+      if(lives<=0) showGameOver();
       else setupLevel();
     }
-  },700);
+  },800);
 }
 
-doorA.onclick = ()=> clickDoor("A");
-doorB.onclick = ()=> clickDoor("B");
-
-function restartGame(){
-  level = 1;
-  lives = 3;
-  updateLives();
-  overlay.classList.remove("show");
-  overlayMsg.style.color = "red";
-  setupLevel();
-}
+doorA.onclick = ()=>clickDoor("A");
+doorB.onclick = ()=>clickDoor("B");
 
 updateLives();
 setupLevel();
