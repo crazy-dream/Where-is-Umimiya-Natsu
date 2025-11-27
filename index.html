@@ -110,7 +110,7 @@ function setupLevel(first=false){
   document.querySelectorAll(".door-card").forEach(d=>d.classList.remove("open"));
   lock=false;
   levelBadge.textContent=`第${level}關`;
-  if(first) setRandomImages(); // 第一次進遊戲就顯示
+  if(first) setRandomImages();
 }
 
 function showGameOver(){
@@ -131,26 +131,25 @@ function clickDoor(side){
   const door=side==="A"?doorA:doorB;
   door.classList.add("open");
 
-  // 門打開動畫完成
   setTimeout(()=>{
-    // 門保持一小段時間後關閉
-    door.classList.remove("open");
+    door.classList.remove("open"); // 門關閉動畫
 
-    // 門完全關閉後再換下一關圖片
     setTimeout(()=>{
-      if(side===jokerSide){
-        level++;
-        if(level>6){ showWin(); return; }
-      }else{
-        lives--;
+      level++; // 不管對錯都增加關卡
+
+      if(side!==jokerSide){
+        lives--; // 選錯扣命
         updateLives();
         if(lives<=0){ showGameOver(); return; }
       }
+
+      if(level>6){ showWin(); return; } // 遊戲勝利
+
       setRandomImages();
       levelBadge.textContent=`第${level}關`;
-      lock=false;
-    },750); // 門關閉動畫時間
-  },800); // 門打開動畫時間
+      lock=false; // 解鎖
+    },750);
+  },800);
 }
 
 doorA.onclick=()=>clickDoor("A");
