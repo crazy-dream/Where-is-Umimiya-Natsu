@@ -11,6 +11,7 @@
   --accent:#ff4b6e;
   --text:#002d59;
   --red:#ff3b3b;
+  --win:#1E90FF; /* WIN藍色 */
 }
 html,body{
   height:100%;
@@ -129,6 +130,9 @@ h1{margin:0;font-size:28px;}
   background:rgba(0,0,0,0.65);
   pointer-events:auto;
 }
+.overlay.show .overlay-message{
+  opacity:1;
+}
 </style>
 </head>
 <body>
@@ -166,7 +170,7 @@ h1{margin:0;font-size:28px;}
 let level = 1;
 let lives = 3;
 let jokerSide = "A";
-let lock = false; // 🔒 點擊鎖定
+let lock = false;
 
 const JOKER_IMAGES = [
   "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png","joker/3.png",
@@ -189,17 +193,6 @@ const overlay = document.getElementById("overlay");
 const overlayMsg = document.getElementById("overlayMsg");
 const levelBadge = document.getElementById("levelBadge");
 
-// 預加載所有圖片
-function preloadImages(urls) {
-  urls.forEach(url => {
-    const img = new Image();
-    img.src = url;
-  });
-}
-
-// 初始化時預加載
-preloadImages([...JOKER_IMAGES, ...FILLER_IMAGES]);
-
 function updateLives(){
   for(let i=1;i<=3;i++){
     const el = document.getElementById("life"+i);
@@ -208,20 +201,21 @@ function updateLives(){
   }
 }
 
-function setupLevel(){
-  document.querySelectorAll(".door-card").forEach(d=>d.classList.remove("open"));
+function setRandomImages(){
   jokerSide = Math.random() < 0.5 ? "A":"B";
-  lock = false; // 🔓 解鎖
-  
-  // 等待門完全關閉後（0.75s）再換圖片
-  setTimeout(() => {
-    const jokerImg = JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
-    const fillerImg = FILLER_IMAGES[0];
-    if(jokerSide==="A"){ imgA.src=jokerImg; imgB.src=fillerImg; }
-    else{ imgA.src=fillerImg; imgB.src=jokerImg; }
-  }, 750); // 匹配CSS transition時間
-  
+  const jokerImg = JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
+  const fillerImg = FILLER_IMAGES[0];
+  if(jokerSide==="A"){ imgA.src=jokerImg; imgB.src=fillerImg; }
+  else{ imgA.src=fillerImg; imgB.src=jokerImg; }
+}
+
+function setupLevel(first=false){
+  document.querySelectorAll(".door-card").forEach(d=>d.classList.remove("open"));
+  lock = false;
   levelBadge.textContent = `第${level}關`;
+  if(first){ // 第一次進遊戲要顯示圖片
+    setRandomImages();
+  }
 }
 
 function showGameOver(){
@@ -233,35 +227,42 @@ function showGameOver(){
 function showWin(){
   overlay.classList.add("show");
   overlayMsg.textContent="WIN";
-  overlayMsg.style.color="lime";
+  overlayMsg.style.color="var(--win)";
 }
 
 function clickDoor(side){
-  if(lock) return; // 鎖住就不處理
-  lock = true;      // 點擊後鎖住
+  if(lock) return;
+  lock = true;
   const door = side==="A"?doorA:doorB;
   door.classList.add("open");
 
+  // 等門動畫結束，然後門收回，再換下一關圖片
   setTimeout(()=>{
-    // 門開完後判斷勝負
+    // 決定勝負
     if(side===jokerSide){
       level++;
-      if(level>6) showWin();
-      else setupLevel(); // 門關閉並在完全關閉後換圖片
+      if(level>6){ showWin(); return; }
     }else{
       lives--;
       updateLives();
-      if(lives<=0) showGameOver();
-      else setupLevel(); // 門關閉並在完全關閉後換圖片
+      if(lives<=0){ showGameOver(); return; }
     }
-  },800); // 門動畫時間
+
+    // 門完全關起來後再換下一關圖片
+    setTimeout(()=>{
+      setRandomImages();
+      document.querySelectorAll(".door-card").forEach(d=>d.classList.remove("open"));
+      lock = false;
+      levelBadge.textContent = `第${level}關`;
+    }, 300); // 門收回動畫時間
+  },800); // 門打開動畫時間
 }
 
 doorA.onclick = ()=>clickDoor("A");
 doorB.onclick = ()=>clickDoor("B");
 
 updateLives();
-setupLevel(); // 初始化設置第一張圖片
+setupLevel(true); // true表示第一次進遊戲就顯示圖片
 </script>
 
 </body>
