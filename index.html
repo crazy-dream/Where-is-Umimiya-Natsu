@@ -129,9 +129,6 @@ h1{margin:0;font-size:28px;}
   background:rgba(0,0,0,0.65);
   pointer-events:auto;
 }
-.overlay.show .overlay-message{
-  opacity:1;
-}
 </style>
 </head>
 <body>
@@ -192,6 +189,17 @@ const overlay = document.getElementById("overlay");
 const overlayMsg = document.getElementById("overlayMsg");
 const levelBadge = document.getElementById("levelBadge");
 
+// 預加載所有圖片
+function preloadImages(urls) {
+  urls.forEach(url => {
+    const img = new Image();
+    img.src = url;
+  });
+}
+
+// 初始化時預加載
+preloadImages([...JOKER_IMAGES, ...FILLER_IMAGES]);
+
 function updateLives(){
   for(let i=1;i<=3;i++){
     const el = document.getElementById("life"+i);
@@ -204,6 +212,15 @@ function setupLevel(){
   document.querySelectorAll(".door-card").forEach(d=>d.classList.remove("open"));
   jokerSide = Math.random() < 0.5 ? "A":"B";
   lock = false; // 🔓 解鎖
+  
+  // 等待門完全關閉後（0.75s）再換圖片
+  setTimeout(() => {
+    const jokerImg = JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
+    const fillerImg = FILLER_IMAGES[0];
+    if(jokerSide==="A"){ imgA.src=jokerImg; imgB.src=fillerImg; }
+    else{ imgA.src=fillerImg; imgB.src=jokerImg; }
+  }, 750); // 匹配CSS transition時間
+  
   levelBadge.textContent = `第${level}關`;
 }
 
@@ -226,22 +243,16 @@ function clickDoor(side){
   door.classList.add("open");
 
   setTimeout(()=>{
-    // 🔹門開完再決定勝負，這裡才隨機挑圖
-    const jokerImg = JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
-    const fillerImg = FILLER_IMAGES[0];
-
-    if(jokerSide==="A"){ imgA.src=jokerImg; imgB.src=fillerImg; }
-    else{ imgA.src=fillerImg; imgB.src=jokerImg; }
-
+    // 門開完後判斷勝負
     if(side===jokerSide){
       level++;
       if(level>6) showWin();
-      else setupLevel();
+      else setupLevel(); // 門關閉並在完全關閉後換圖片
     }else{
       lives--;
       updateLives();
       if(lives<=0) showGameOver();
-      else setupLevel();
+      else setupLevel(); // 門關閉並在完全關閉後換圖片
     }
   },800); // 門動畫時間
 }
@@ -250,7 +261,7 @@ doorA.onclick = ()=>clickDoor("A");
 doorB.onclick = ()=>clickDoor("B");
 
 updateLives();
-setupLevel();
+setupLevel(); // 初始化設置第一張圖片
 </script>
 
 </body>
