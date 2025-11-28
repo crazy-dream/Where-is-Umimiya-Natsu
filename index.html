@@ -1,256 +1,246 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>猜猜小丑在哪裡</title>
+
 <style>
 :root{
   --bg:#bfe8ff;
   --door:#3aa0ff;
-  --door-front:#2a84d6;
   --accent:#ff4b6e;
   --text:#002d59;
+  --red:#ff3b3b;
+  --win:#1E90FF;
+}
+html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; background:var(--bg);}
+.game-wrap{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:28px; gap:18px;}
+header{width:100%; display:flex; justify-content:center; position:relative;}
+h1{margin:0;font-size:28px;}
+.level-badge{position:absolute; left:18px; top:0; padding:6px 10px; border-radius:10px;
+  font-weight:700; background:rgba(255,255,255,0.25); backdrop-filter: blur(4px);}
+.lives{position:absolute; right:18px; top:0; display:flex; gap:8px;}
+.life{width:18px; height:18px; border-radius:50%; background:var(--red);}
+.life.empty{background:#eee; border:1px solid #aaa;}
+
+.stage{display:flex; gap:32px; justify-content:center; margin-top:20px;}
+
+.door-card{
+  width:540px; height:420px; background:var(--door);
+  border-radius:16px; position:relative; overflow:hidden; cursor:pointer;
+  transition:0.2s;
 }
 
-body{
-  margin:0;
-  background:var(--bg);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  height:100vh;
-  overflow:hidden;
-  user-select:none;
-  font-family:'Arial',sans-serif;
+/* ⛔ 錯誤時抖動 */
+@keyframes shake {
+  0%{ transform:translateX(0);}
+  20%{ transform:translateX(-12px);}
+  40%{ transform:translateX(12px);}
+  60%{ transform:translateX(-8px);}
+  80%{ transform:translateX(8px);}
+  100%{ transform:translateX(0);}
 }
+.shake{ animation:shake 0.4s ease; }
 
-/* 門容器 */
-.door-box{
-  position:relative;
-  width:260px;
-  height:380px;
-  perspective:1100px;
-  cursor:pointer;
-}
+.reveal-area{position:absolute; inset:0; z-index:1; display:flex; justify-content:center; align-items:center;}
+.reveal-img{max-width:100%; max-height:100%; object-fit:cover;}
 
-/* 後門（固定不動的那扇） */
-.back-door{
-  position:absolute;
-  width:100%;
-  height:100%;
-  background:var(--door);
-  border-radius:10px;
-}
+.panel{position:absolute; z-index:10; width:50%; top:0; bottom:0; display:flex;
+  justify-content:center; align-items:center; font-size:60px; font-weight:900;
+  background:var(--door); transition:0.75s;}
+.panel.left{ left:0; }
+.panel.right{ right:0; }
+.door-card.open .panel.left{ transform:translateX(-100%); }
+.door-card.open .panel.right{ transform:translateX(100%); }
 
-/* 前門（會開的那扇） */
-.front-door{
-  position:absolute;
-  width:100%;
-  height:100%;
-  background:var(--door-front);
-  border-radius:10px;
-  transform-origin:left;
-  transform:rotateY(0deg);
-  transition:transform 0.75s ease;
-}
-
-/* 開門 */
-.open{
-  transform:rotateY(-98deg);
-}
-
-/* 顯示圖片 */
-#jokerImg{
-  position:absolute;
-  top:0; left:0;
-  width:100%; height:100%;
-  object-fit:cover;
-  border-radius:10px;
-  display:none;
-}
-
-/* 小丑出場特效 */
-.joker-pop{
-  position:absolute;
-  top:50%; left:50%;
-  transform:translate(-50%,-50%) scale(0.1);
-  font-size:70px;
-  opacity:0;
-  transition:transform 0.6s ease, opacity 0.6s ease;
-}
-
-.joker-pop.show{
-  transform:translate(-50%,-50%) scale(1.4);
-  opacity:1;
-}
-
-.joker-pop.hide{
-  opacity:0;
-  transform:translate(-50%,-50%) scale(0.1);
-}
-
-/* 錯誤搖晃 */
-@keyframes shakeDoor {
-  0%{ transform:rotateY(-98deg) translateX(0px); }
-  25%{ transform:rotateY(-98deg) translateX(-6px); }
-  50%{ transform:rotateY(-98deg) translateX(6px); }
-  75%{ transform:rotateY(-98deg) translateX(-6px); }
-  100%{ transform:rotateY(-98deg) translateX(0px); }
-}
-
-.shake{
-  animation:shakeDoor 0.45s;
-}
-
-/* WIN / GAME OVER */
-.result{
+/* 🎉 小丑爆擊（更大、半透明） */
+.pop-clown{
   position:fixed;
-  top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  font-size:80px;
-  font-weight:900;
-  color:red;
-  text-shadow:3px 3px 8px black;
-  display:none;
-  z-index:999;
+  left:50%; top:50%;
+  transform:translate(-50%,-50%) scale(0.1);
+  font-size:40px;
+  opacity:0.2;
+  z-index:9999;
+  animation:pop 0.9s ease-out forwards;
+}
+@keyframes pop {
+  0% { transform:translate(-50%,-50%) scale(0.1); opacity:0; }
+  40%{ transform:translate(-50%,-50%) scale(3.0); opacity:0.7; }
+  100%{ transform:translate(-50%,-50%) scale(4.0); opacity:0; }
 }
 
-.win-text{
-  color:#0080ff; /* 你要求：WIN 改藍色 */
-}
-
-/* 右上角關卡 */
-#levelText{
-  position:fixed;
-  top:10px;
-  right:15px;
-  font-size:30px;
-  color:#003060;
-  font-weight:bold;
-}
-
+.overlay{position:fixed; inset:0; display:flex; justify-content:center;
+  align-items:center; background:rgba(0,0,0,0); pointer-events:none;
+  z-index:999; transition:0.3s;}
+.overlay-message{opacity:0; font-size:70px; font-weight:900; color:red; transition:0.3s;}
+.overlay.show{background:rgba(0,0,0,0.65); pointer-events:auto;}
+.overlay.show .overlay-message{opacity:1;}
 </style>
 </head>
+
 <body>
 
-<div id="levelText">Lv. 1</div>
+<div class="game-wrap">
+  <header>
+    <div class="level-badge" id="levelBadge">第1關</div>
+    <h1>猜猜小丑在哪裡</h1>
+    <div class="lives">
+      <div class="life" id="life1"></div>
+      <div class="life" id="life2"></div>
+      <div class="life" id="life3"></div>
+    </div>
+  </header>
 
-<div class="door-box" id="doorBox">
-  <img id="jokerImg">
-  <div class="back-door"></div>
-  <div class="front-door" id="frontDoor"></div>
+  <div class="stage">
+    <div class="door-card" id="doorA">
+      <div class="reveal-area"><img id="imgA" class="reveal-img"></div>
+      <div class="panel left">🤡</div>
+      <div class="panel right">🤡</div>
+    </div>
+    <div class="door-card" id="doorB">
+      <div class="reveal-area"><img id="imgB" class="reveal-img"></div>
+      <div class="panel left">🤡</div>
+      <div class="panel right">🤡</div>
+    </div>
+  </div>
 </div>
 
-<div class="joker-pop" id="jokerPop">🤡</div>
-
-<div class="result" id="resultText"></div>
+<div class="overlay" id="overlay">
+  <div class="overlay-message" id="overlayMsg">GAME OVER</div>
+</div>
 
 <script>
-/* 所有正確小丑們 */
-const JOKER_IMAGES = [
+let level=1, lives=3, jokerSide="A", lock=false;
+
+/* 🎭 小丑圖 */
+const JOKER_IMAGES=[
   "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png",
   "joker/3.png","joker/4 (2).png","joker/4.png","joker/5.png",
   "joker/546175134_1138063744950693_180659281319095751_n.jpg",
-  "joker/Am I (1).jpg","joker/Am I (2).jpg","joker/Am I (3).jpg","joker/Am I (4).jpg","joker/Am I.jpg",
-  "joker/I am joker. (1).jpg","joker/I am joker. (2).jpg","joker/I am joker. (3).jpg",
-  "joker/I am joker. 的複本 (1).jpg","joker/I am joker..jpg","joker/I am joker..png",
+  "joker/Am I (1).jpg","joker/Am I (2).jpg","joker/Am I (3).jpg","joker/Am I (4).jpg",
+  "joker/Am I.jpg","joker/I am joker. (1).jpg","joker/I am joker. (2).jpg",
+  "joker/I am joker. (3).jpg","joker/I am joker. 的複本 (1).jpg",
+  "joker/I am joker..jpg","joker/I am joker..png",
   "joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440-removebg-preview.png",
   "joker/IMG_20251118_213550_407.jpg",
   "joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp","joker/unnamed.webp",
   "joker/未命名設計.jpg","joker/未命名設計.png",
-  "joker/螢幕擷取畫面 2025-11-20 231537.png","joker/螢幕擷取畫面 2025-11-20 231953.png",
-  "joker/螢幕擷取畫面 2025-11-20 232248.png","joker/螢幕擷取畫面 2025-11-20 232410.png",
-  "joker/螢幕擷取畫面 2025-11-20 232433.png","joker/螢幕擷取畫面 2025-11-20 232449.png",
-  "joker/螢幕擷取畫面 2025-11-20 233008.png"
+  "joker/螢幕擷取畫面 2025-11-20 231537.png",
+  "joker/螢幕擷取畫面 2025-11-20 231953.png","joker/螢幕擷取畫面 2025-11-20 232248.png",
+  "joker/螢幕擷取畫面 2025-11-20 232410.png","joker/螢幕擷取畫面 2025-11-20 232433.png",
+  "joker/螢幕擷取畫面 2025-11-20 232449.png","joker/螢幕擷取畫面 2025-11-20 233008.png"
 ];
 
-/* 錯誤用 */
-const WRONG_IMAGE = "wrong/Ri86b7h.jpg";
+/* ❌ 錯誤圖 */
+const FILLER_IMAGES=["wrong/Ri86b7h.jpg"];
 
-let frontDoor = document.getElementById("frontDoor");
-let jokerImg = document.getElementById("jokerImg");
-let doorBox = document.getElementById("doorBox");
-let resultText = document.getElementById("resultText");
-let jokerPop = document.getElementById("jokerPop");
-let levelText = document.getElementById("levelText");
+/* 抓元素 */
+const doorA=document.getElementById("doorA");
+const doorB=document.getElementById("doorB");
+const imgA=document.getElementById("imgA");
+const imgB=document.getElementById("imgB");
+const overlay=document.getElementById("overlay");
+const overlayMsg=document.getElementById("overlayMsg");
 
-let canClick = true;
-let level = 1;
-let isCorrect = false;
-
-/* 隨機挑一張小丑 */
-function getRandomJoker(){
-  return JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
-}
-
-/* 設定新圖片（正確 or 錯誤） */
-function setNewImage(){
-  jokerImg.style.display = "none";
-
-  isCorrect = Math.random() < 0.5; // 50% 機率
-
-  if(isCorrect){
-    jokerImg.src = getRandomJoker();
-  }else{
-    jokerImg.src = WRONG_IMAGE;
+/* 更新生命 */
+function updateLives(){
+  for(let i=1;i<=3;i++){
+    const el=document.getElementById("life"+i);
+    if(i<=lives) el.classList.remove("empty");
+    else el.classList.add("empty");
   }
 }
 
-/* 第一次先設定 */
-setNewImage();
+/* 隨機圖 */
+function setRandomImages(){
+  jokerSide=Math.random()<0.5?"A":"B";
+  const jokerImg=JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
+  const fillerImg=FILLER_IMAGES[0];
 
-/* 點擊事件 */
-doorBox.onclick = async ()=>{
-  if(!canClick) return;
-  canClick = false;
-
-  /* 開門 */
-  frontDoor.classList.add("open");
-
-  await wait(750); // 等待門完全開啟
-
-  jokerImg.style.display = "block";
-
-  /* 特效開始 */
-  if(isCorrect){
-    jokerPop.classList.add("show");
-
-    await wait(600); // 小丑放大特效
-
-    jokerPop.classList.remove("show");
-    jokerPop.classList.add("hide");
-
-    await wait(300);
-    jokerPop.classList.remove("hide");
-
-  }else{
-    frontDoor.classList.add("shake");
-
-    await wait(450);
-
-    frontDoor.classList.remove("shake");
-  }
-
-  /* 關門 */
-  frontDoor.classList.remove("open");
-
-  await wait(750); // 門完全關閉後才能換圖（你要求的）
-
-  level++;
-  levelText.textContent = "Lv. " + level;
-
-  setNewImage();
-
-  canClick = true;
-};
-
-/* 小工具：等待 */
-function wait(ms){
-  return new Promise(res=>setTimeout(res,ms));
+  if(jokerSide==="A"){ imgA.src=jokerImg; imgB.src=fillerImg; }
+  else{ imgA.src=fillerImg; imgB.src=jokerImg; }
 }
 
+/* 正確特效（同步） */
+function playCorrectEffect(){
+  const pop=document.createElement("div");
+  pop.className="pop-clown";
+  pop.textContent="🤡";
+  document.body.appendChild(pop);
+  setTimeout(()=>pop.remove(),900);
+}
+
+/* 錯誤門抖動（同步） */
+function playWrongEffect(door){
+  door.classList.add("shake");
+  setTimeout(()=>door.classList.remove("shake"),400);
+}
+
+/* Game Over */
+function showGameOver(){
+  overlay.classList.add("show");
+  overlayMsg.textContent="GAME OVER";
+  overlayMsg.style.color="red";
+}
+
+/* WIN */
+function showWin(){
+  overlay.classList.add("show");
+  overlayMsg.textContent="WIN";
+  overlayMsg.style.color="var(--win)";
+}
+
+/* 點門 */
+function clickDoor(side){
+  if(lock) return;
+  lock=true;
+
+  const door=side==="A"?doorA:doorB;
+  const correct=(side===jokerSide);
+
+  /* 門開始開啟 */
+  door.classList.add("open");
+
+  /* ⭐ 在開門瞬間就同步觸發特效 ⭐ */
+  if(correct){
+    playCorrectEffect();
+  }else{
+    playWrongEffect(door);
+  }
+
+  /* 門打開後等一下 */
+  setTimeout(()=>{
+
+    /* 開始關門 */
+    door.classList.remove("open");
+
+    /* 關門結束後換圖 */
+    setTimeout(()=>{
+      /* 正常流程不變 */
+      if(!correct){
+        lives--;
+        updateLives();
+        if(lives<=0){ showGameOver(); return; }
+      }
+
+      level++;
+
+      if(level>6){ showWin(); return; }
+
+      setRandomImages();
+      document.getElementById("levelBadge").textContent=`第${level}關`;
+      lock=false;
+    },750);
+
+  },800);
+}
+
+doorA.onclick=()=>clickDoor("A");
+doorB.onclick=()=>clickDoor("B");
+
+updateLives();
+setRandomImages();
 </script>
 
 </body>
