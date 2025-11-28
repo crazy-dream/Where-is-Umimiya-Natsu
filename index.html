@@ -32,7 +32,6 @@ h1{margin:0;font-size:28px;}
   transition:0.2s;
 }
 
-/* ⛔ 錯誤時抖動 */
 @keyframes shake {
   0%{ transform:translateX(0);}
   20%{ transform:translateX(-12px);}
@@ -54,7 +53,6 @@ h1{margin:0;font-size:28px;}
 .door-card.open .panel.left{ transform:translateX(-100%); }
 .door-card.open .panel.right{ transform:translateX(100%); }
 
-/* 🎉 小丑爆擊（更大、半透明） */
 .pop-clown{
   position:fixed;
   left:50%; top:50%;
@@ -111,9 +109,8 @@ h1{margin:0;font-size:28px;}
 </div>
 
 <script>
-let level=1, lives=3, jokerSide="A", lock=false;
+let level=1,lives=3,jokerSide="A",lock=false;
 
-/* 🎭 小丑圖 */
 const JOKER_IMAGES=[
   "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png",
   "joker/3.png","joker/4 (2).png","joker/4.png","joker/5.png",
@@ -131,11 +128,8 @@ const JOKER_IMAGES=[
   "joker/螢幕擷取畫面 2025-11-20 232410.png","joker/螢幕擷取畫面 2025-11-20 232433.png",
   "joker/螢幕擷取畫面 2025-11-20 232449.png","joker/螢幕擷取畫面 2025-11-20 233008.png"
 ];
-
-/* ❌ 錯誤圖 */
 const FILLER_IMAGES=["wrong/Ri86b7h.jpg"];
 
-/* 抓元素 */
 const doorA=document.getElementById("doorA");
 const doorB=document.getElementById("doorB");
 const imgA=document.getElementById("imgA");
@@ -143,7 +137,6 @@ const imgB=document.getElementById("imgB");
 const overlay=document.getElementById("overlay");
 const overlayMsg=document.getElementById("overlayMsg");
 
-/* 更新生命 */
 function updateLives(){
   for(let i=1;i<=3;i++){
     const el=document.getElementById("life"+i);
@@ -152,17 +145,28 @@ function updateLives(){
   }
 }
 
-/* 隨機圖 */
-function setRandomImages(){
+function preloadImage(src){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>resolve(src);
+    img.src=src;
+  });
+}
+
+let nextImages={A:'',B:''};
+async function setRandomImages(){
   jokerSide=Math.random()<0.5?"A":"B";
   const jokerImg=JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
   const fillerImg=FILLER_IMAGES[0];
 
-  if(jokerSide==="A"){ imgA.src=jokerImg; imgB.src=fillerImg; }
-  else{ imgA.src=fillerImg; imgB.src=jokerImg; }
+  if(jokerSide==="A"){ nextImages={A:jokerImg,B:fillerImg}; }
+  else{ nextImages={A:fillerImg,B:jokerImg}; }
+
+  await Promise.all([preloadImage(nextImages.A),preloadImage(nextImages.B)]);
+  imgA.src=nextImages.A;
+  imgB.src=nextImages.B;
 }
 
-/* 正確特效（同步） */
 function playCorrectEffect(){
   const pop=document.createElement("div");
   pop.className="pop-clown";
@@ -171,27 +175,23 @@ function playCorrectEffect(){
   setTimeout(()=>pop.remove(),900);
 }
 
-/* 錯誤門抖動（同步） */
 function playWrongEffect(door){
   door.classList.add("shake");
   setTimeout(()=>door.classList.remove("shake"),400);
 }
 
-/* Game Over */
 function showGameOver(){
   overlay.classList.add("show");
   overlayMsg.textContent="GAME OVER";
   overlayMsg.style.color="red";
 }
 
-/* WIN */
 function showWin(){
   overlay.classList.add("show");
   overlayMsg.textContent="WIN";
   overlayMsg.style.color="var(--win)";
 }
 
-/* 點門 */
 function clickDoor(side){
   if(lock) return;
   lock=true;
@@ -199,25 +199,18 @@ function clickDoor(side){
   const door=side==="A"?doorA:doorB;
   const correct=(side===jokerSide);
 
-  /* 門開始開啟 */
   door.classList.add("open");
 
-  /* ⭐ 在開門瞬間就同步觸發特效 ⭐ */
   if(correct){
     playCorrectEffect();
   }else{
     playWrongEffect(door);
   }
 
-  /* 門打開後等一下 */
   setTimeout(()=>{
-
-    /* 開始關門 */
     door.classList.remove("open");
 
-    /* 關門結束後換圖 */
-    setTimeout(()=>{
-      /* 正常流程不變 */
+    setTimeout(async()=>{
       if(!correct){
         lives--;
         updateLives();
@@ -225,11 +218,10 @@ function clickDoor(side){
       }
 
       level++;
-
       if(level>6){ showWin(); return; }
 
-      setRandomImages();
       document.getElementById("levelBadge").textContent=`第${level}關`;
+      await setRandomImages();
       lock=false;
     },750);
 
