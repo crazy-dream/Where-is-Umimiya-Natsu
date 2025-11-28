@@ -31,7 +31,7 @@ html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; ba
 #storyImg{
   width:100%;
   height:100%;
-  object-fit:cover;   /* ← 讓圖片真正全螢幕覆蓋 */
+  object-fit:cover;
   background:black;
 }
 
@@ -44,10 +44,10 @@ html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; ba
   font-size:28px;
   letter-spacing:4px;
   opacity:0.8;
-  color:black;        /* 預設黑色 */
+  color:black;
 }
 
-/* ======== 遊戲（原樣，不准改） ======== */
+/* ======== 遊戲（未更動） ======== */
 .game-wrap{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:28px; gap:18px;}
 header{width:100%; display:flex; justify-content:center; position:relative;}
 h1{margin:0;font-size:28px;}
@@ -112,7 +112,7 @@ h1{margin:0;font-size:28px;}
 
 <body>
 
-<!-- ======== 故事播放器（新增） ======== -->
+<!-- ======== 故事播放器 ======== -->
 <div id="storyPlayer">
   <img id="storyImg">
   <div id="storyHint">點擊任意地方繼續</div>
@@ -150,7 +150,7 @@ h1{margin:0;font-size:28px;}
 
 <script>
 /* ============================================================
-   故事播放系統（修改：分別控制提示字顏色）
+   故事播放系統（已修正提示顏色）
    ============================================================ */
 
 const introStory = [
@@ -189,7 +189,6 @@ function playStory(list, mode){
 
   storyImg.src = currentStory[0];
 
-  /* 預設：黑色＋繼續 */
   storyHint.textContent = "點擊任意地方繼續";
   storyHint.style.color = "black";
 
@@ -212,10 +211,16 @@ storyPlayer.onclick = ()=>{
 
   storyImg.src = currentStory[storyIndex];
 
-  /* 最後一張（只有洋芋片9）→ 白色字＋再一次 */
+  /* ===== 修正重點：依故事類型改提示 ===== */
   if(storyIndex === currentStory.length - 1){
-    storyHint.textContent = "點擊螢幕任意地方再一次";
-    storyHint.style.color = "white";
+
+    if(storyMode === "intro"){
+      storyHint.textContent = "點擊任意地方繼續";
+      storyHint.style.color = "black";
+    } else {
+      storyHint.textContent = "點擊螢幕任意地方再一次";
+      storyHint.style.color = "white";
+    }
   }
 };
 
@@ -225,7 +230,7 @@ playStory(introStory, "intro");
 
 
 /* ============================================================
-   以下全部是你的遊戲程式碼（完全沒動）
+   以下為遊戲程式（完全沒動）
    ============================================================ */
 
 let level=1,lives=3,jokerSide="A",lock=false;
