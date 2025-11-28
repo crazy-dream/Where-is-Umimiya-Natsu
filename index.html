@@ -16,7 +16,7 @@
 }
 html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; background:var(--bg);}
 
-/* ======== 故事播放（新增） ======== */
+/* ======== 故事播放（修改：全螢幕 cover） ======== */
 #storyPlayer{
   position:fixed;
   inset:0;
@@ -31,7 +31,7 @@ html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; ba
 #storyImg{
   width:100%;
   height:100%;
-  object-fit:contain;
+  object-fit:cover;   /* ← 讓圖片真正全螢幕覆蓋 */
   background:black;
 }
 
@@ -42,9 +42,9 @@ html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; ba
   transform:translateY(-50%);
   writing-mode:vertical-rl;
   font-size:28px;
-  color:white;
   letter-spacing:4px;
   opacity:0.8;
+  color:black;        /* 預設黑色 */
 }
 
 /* ======== 遊戲（原樣，不准改） ======== */
@@ -150,7 +150,7 @@ h1{margin:0;font-size:28px;}
 
 <script>
 /* ============================================================
-   故事播放系統（新增）
+   故事播放系統（修改：分別控制提示字顏色）
    ============================================================ */
 
 const introStory = [
@@ -189,10 +189,9 @@ function playStory(list, mode){
 
   storyImg.src = currentStory[0];
 
-  if(mode==="intro"){
-    storyHint.textContent = "點擊任意地方繼續";
-    storyHint.style.color = "white";
-  }
+  /* 預設：黑色＋繼續 */
+  storyHint.textContent = "點擊任意地方繼續";
+  storyHint.style.color = "black";
 
   storyPlayer.style.display = "flex";
 }
@@ -202,13 +201,10 @@ storyPlayer.onclick = ()=>{
   storyIndex++;
 
   if(storyIndex >= currentStory.length){
-    // 結束故事 → 要做不同事
     if(storyMode==="intro"){
       storyPlayer.style.display="none";
       document.getElementById("gameArea").style.display="flex";
-    }else if(storyMode==="gameover"){
-      location.reload();
-    }else if(storyMode==="win"){
+    }else{
       location.reload();
     }
     return;
@@ -216,9 +212,9 @@ storyPlayer.onclick = ()=>{
 
   storyImg.src = currentStory[storyIndex];
 
-  // 最後一張要顯示白色直排字
-  if(storyIndex === currentStory.length-1){
-    storyHint.textContent = "點擊任意地方再一次";
+  /* 最後一張（只有洋芋片9）→ 白色字＋再一次 */
+  if(storyIndex === currentStory.length - 1){
+    storyHint.textContent = "點擊螢幕任意地方再一次";
     storyHint.style.color = "white";
   }
 };
@@ -229,7 +225,7 @@ playStory(introStory, "intro");
 
 
 /* ============================================================
-   以下全部是你的遊戲程式碼（完全沒有動）
+   以下全部是你的遊戲程式碼（完全沒動）
    ============================================================ */
 
 let level=1,lives=3,jokerSide="A",lock=false;
