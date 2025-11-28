@@ -16,6 +16,32 @@
 }
 html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; background:var(--bg);}
 .game-wrap{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:28px; gap:18px;}
+
+/* story cover */
+#storyCover{
+  position:fixed; inset:0;
+  background:var(--bg);
+  display:flex; flex-direction:row;
+  justify-content:center; align-items:center;
+  z-index:9999;
+  cursor:pointer;
+}
+#storyImages{
+  display:flex; flex-direction:column; gap:10px;
+}
+#storyImages img{
+  width:150px;
+  border-radius:8px;
+}
+#storyText{
+  writing-mode: vertical-rl;
+  font-size:24px;
+  font-weight:700;
+  color:#000;
+  margin-left:24px;
+}
+
+/* 原有樣式 */
 header{width:100%; display:flex; justify-content:center; position:relative;}
 h1{margin:0;font-size:28px;}
 .level-badge{position:absolute; left:18px; top:0; padding:6px 10px; border-radius:10px;
@@ -79,6 +105,19 @@ h1{margin:0;font-size:28px;}
 
 <body>
 
+<!-- story cover -->
+<div id="storyCover">
+  <div id="storyImages">
+    <img src="story/洋芋片1.jpg">
+    <img src="story/洋芋片2.jpg">
+    <img src="story/洋芋片3.jpg">
+    <img src="story/洋芋片4.jpg">
+    <img src="story/洋芋片5.jpg">
+    <img src="story/洋芋片6.jpg">
+  </div>
+  <div id="storyText">點擊任意地方繼續</div>
+</div>
+
 <div class="game-wrap">
   <header>
     <div class="level-badge" id="levelBadge">第1關</div>
@@ -111,6 +150,7 @@ h1{margin:0;font-size:28px;}
 <script>
 let level=1,lives=3,jokerSide="A",lock=false;
 
+/* 🎭 小丑圖 */
 const JOKER_IMAGES=[
   "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png",
   "joker/3.png","joker/4 (2).png","joker/4.png","joker/5.png",
@@ -128,6 +168,8 @@ const JOKER_IMAGES=[
   "joker/螢幕擷取畫面 2025-11-20 232410.png","joker/螢幕擷取畫面 2025-11-20 232433.png",
   "joker/螢幕擷取畫面 2025-11-20 232449.png","joker/螢幕擷取畫面 2025-11-20 233008.png"
 ];
+
+/* ❌ 錯誤圖 */
 const FILLER_IMAGES=["wrong/Ri86b7h.jpg"];
 
 const doorA=document.getElementById("doorA");
@@ -137,6 +179,7 @@ const imgB=document.getElementById("imgB");
 const overlay=document.getElementById("overlay");
 const overlayMsg=document.getElementById("overlayMsg");
 
+/* 更新生命 */
 function updateLives(){
   for(let i=1;i<=3;i++){
     const el=document.getElementById("life"+i);
@@ -145,6 +188,7 @@ function updateLives(){
   }
 }
 
+/* 預載圖 */
 function preloadImage(src){
   return new Promise(resolve=>{
     const img=new Image();
@@ -167,6 +211,7 @@ async function setRandomImages(){
   imgB.src=nextImages.B;
 }
 
+/* 特效 */
 function playCorrectEffect(){
   const pop=document.createElement("div");
   pop.className="pop-clown";
@@ -174,7 +219,6 @@ function playCorrectEffect(){
   document.body.appendChild(pop);
   setTimeout(()=>pop.remove(),900);
 }
-
 function playWrongEffect(door){
   door.classList.add("shake");
   setTimeout(()=>door.classList.remove("shake"),400);
@@ -185,7 +229,6 @@ function showGameOver(){
   overlayMsg.textContent="GAME OVER";
   overlayMsg.style.color="red";
 }
-
 function showWin(){
   overlay.classList.add("show");
   overlayMsg.textContent="WIN";
@@ -195,44 +238,40 @@ function showWin(){
 function clickDoor(side){
   if(lock) return;
   lock=true;
-
   const door=side==="A"?doorA:doorB;
   const correct=(side===jokerSide);
-
   door.classList.add("open");
 
-  if(correct){
-    playCorrectEffect();
-  }else{
-    playWrongEffect(door);
-  }
+  if(correct) playCorrectEffect();
+  else playWrongEffect(door);
 
   setTimeout(()=>{
     door.classList.remove("open");
-
     setTimeout(async()=>{
       if(!correct){
         lives--;
         updateLives();
         if(lives<=0){ showGameOver(); return; }
       }
-
       level++;
       if(level>6){ showWin(); return; }
-
       document.getElementById("levelBadge").textContent=`第${level}關`;
       await setRandomImages();
       lock=false;
     },750);
-
   },800);
 }
 
 doorA.onclick=()=>clickDoor("A");
 doorB.onclick=()=>clickDoor("B");
 
-updateLives();
-setRandomImages();
+/* 點擊 storyCover 消失 */
+const storyCover=document.getElementById("storyCover");
+storyCover.onclick=()=>{
+  storyCover.style.display="none";
+  updateLives();
+  setRandomImages();
+}
 </script>
 
 </body>
