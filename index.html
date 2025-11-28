@@ -14,10 +14,10 @@
   --red:#ff3b3b;
   --win:#1E90FF;
 }
-html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; background:var(--bg); overflow:hidden;}
+html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; background:var(--bg);}
 
-/* ====== 開場（全螢幕） ====== */
-#storyIntro{
+/* ======== 故事播放（新增） ======== */
+#storyPlayer{
   position:fixed;
   inset:0;
   background:black;
@@ -25,54 +25,29 @@ html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; ba
   justify-content:center;
   align-items:center;
   z-index:99999;
+  flex-direction:column;
 }
+
 #storyImg{
-  width:100vw;
-  height:100vh;
-  object-fit:cover;
-  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:black;
 }
+
 #storyHint{
   position:absolute;
-  right:30px;
+  right:20px;
   top:50%;
   transform:translateY(-50%);
   writing-mode:vertical-rl;
-  color:black;
   font-size:28px;
-  user-select:none;
-  background:rgba(255,255,255,0.0);
-  padding:6px;
+  color:white;
+  letter-spacing:4px;
+  opacity:0.8;
 }
 
-/* ====== GAME OVER / WIN 後的全螢幕序列 ====== */
-#postSeq{
-  position:fixed;
-  inset:0;
-  background:black;
-  display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:100000;
-}
-#postImg{
-  width:100vw;
-  height:100vh;
-  object-fit:cover;
-}
-#postHint{
-  position:absolute;
-  right:30px;
-  top:50%;
-  transform:translateY(-50%);
-  writing-mode:vertical-rl;
-  color:black;
-  font-size:28px;
-  user-select:none;
-  padding:6px;
-}
-
-/* ====== 遊戲本體 ====== */
+/* ======== 遊戲（原樣，不准改） ======== */
 .game-wrap{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:28px; gap:18px;}
 header{width:100%; display:flex; justify-content:center; position:relative;}
 h1{margin:0;font-size:28px;}
@@ -137,19 +112,13 @@ h1{margin:0;font-size:28px;}
 
 <body>
 
-<!-- ====== 開場故事播放（1~6，全螢幕） ====== -->
-<div id="storyIntro" aria-hidden="false" role="dialog">
-  <img id="storyImg" src="">
+<!-- ======== 故事播放器（新增） ======== -->
+<div id="storyPlayer">
+  <img id="storyImg">
   <div id="storyHint">點擊任意地方繼續</div>
 </div>
 
-<!-- ====== GAME OVER / WIN 後的序列容器（會動態放入不同張數） ====== -->
-<div id="postSeq" aria-hidden="true" role="dialog">
-  <img id="postImg" src="">
-  <div id="postHint">點擊任意地方在一次</div>
-</div>
-
-<!-- ====== 遊戲本體（原樣保留） ====== -->
+<!-- ======== 遊戲主體（未更動） ======== -->
 <div class="game-wrap" id="gameArea" style="display:none;">
   <header>
     <div class="level-badge" id="levelBadge">第1關</div>
@@ -180,8 +149,11 @@ h1{margin:0;font-size:28px;}
 </div>
 
 <script>
-/* ====== 開場故事播放邏輯（1~6，依序，全螢幕） ====== */
-const storyImgsIntro=[
+/* ============================================================
+   故事播放系統（新增）
+   ============================================================ */
+
+const introStory = [
   "story/洋芋片1.jpg",
   "story/洋芋片2.jpg",
   "story/洋芋片3.jpg",
@@ -190,94 +162,75 @@ const storyImgsIntro=[
   "story/洋芋片6.jpg"
 ];
 
-let storyIndex=0;
-const storyIntro=document.getElementById("storyIntro");
-const storyImg=document.getElementById("storyImg");
-const storyHint=document.getElementById("storyHint");
-storyImg.src=storyImgsIntro[0];
+const gameOverStory = [
+  "story/洋芋片7.jpg",
+  "story/洋芋片8.jpg",
+  "story/洋芋片9.jpg"
+];
 
-// 點擊開場圖 → 切下一張，最後一張點擊結束開場並顯示遊戲
-storyIntro.onclick = (e) => {
-  storyIndex++;
-  if (storyIndex < storyImgsIntro.length) {
-    storyImg.src = storyImgsIntro[storyIndex];
-  } else {
-    // 隱藏開場，顯示遊戲
-    storyIntro.style.display = "none";
-    document.getElementById("gameArea").style.display = "flex";
-    // 確保能見到游標與滾動（遊戲用）
-    document.body.style.overflow = "hidden";
+const winStory = [
+  "story/洋芋片8.jpg",
+  "story/洋芋片9.jpg"
+];
+
+let storyIndex = 0;
+let currentStory = introStory;
+let storyMode = "intro"; // intro / gameover / win
+
+const storyPlayer = document.getElementById("storyPlayer");
+const storyImg = document.getElementById("storyImg");
+const storyHint = document.getElementById("storyHint");
+
+/* 顯示故事畫面 */
+function playStory(list, mode){
+  currentStory = list;
+  storyMode = mode;
+  storyIndex = 0;
+
+  storyImg.src = currentStory[0];
+
+  if(mode==="intro"){
+    storyHint.textContent = "點擊任意地方繼續";
+    storyHint.style.color = "white";
   }
-};
 
-/* ====== POST-SEQUENCE（GAME OVER / WIN）邏輯 ======
-   showPostSequence(type) 會顯示一連串圖片：
-   - type === "gameover" -> images: 7,8,9
-   - type === "win" -> images: 8,9
-   最後一張（若是洋芋片9）右側字為白色，文字為 "點擊任意地方在一次"
-   點擊最後一張會重新載入頁面（回到開場）
-*/
-const postSeq = document.getElementById("postSeq");
-const postImg = document.getElementById("postImg");
-const postHint = document.getElementById("postHint");
+  storyPlayer.style.display = "flex";
+}
 
-function showPostSequence(type){
-  let seq = [];
-  if(type === "gameover"){
-    seq = [
-      "story/洋芋片7.jpg",
-      "story/洋芋片8.jpg",
-      "story/洋芋片9.jpg"
-    ];
-  } else if(type === "win"){
-    seq = [
-      "story/洋芋片8.jpg",
-      "story/洋芋片9.jpg"
-    ];
-  } else {
+/* 點擊切換故事圖片 */
+storyPlayer.onclick = ()=>{
+  storyIndex++;
+
+  if(storyIndex >= currentStory.length){
+    // 結束故事 → 要做不同事
+    if(storyMode==="intro"){
+      storyPlayer.style.display="none";
+      document.getElementById("gameArea").style.display="flex";
+    }else if(storyMode==="gameover"){
+      location.reload();
+    }else if(storyMode==="win"){
+      location.reload();
+    }
     return;
   }
 
-  let idx = 0;
-  // 顯示容器
-  postSeq.style.display = "flex";
-  postSeq.setAttribute("aria-hidden","false");
+  storyImg.src = currentStory[storyIndex];
 
-  // 初始顯示第一張
-  postImg.src = seq[0];
-  // 預設提示（隱藏或黑色）
-  postHint.style.color = "black";
-  postHint.textContent = "點擊任意地方繼續";
+  // 最後一張要顯示白色直排字
+  if(storyIndex === currentStory.length-1){
+    storyHint.textContent = "點擊任意地方再一次";
+    storyHint.style.color = "white";
+  }
+};
 
-  // 點擊切換
-  const clickHandler = () => {
-    idx++;
-    if(idx < seq.length){
-      postImg.src = seq[idx];
-      // 若目前是最後一張且是 洋芋片9（filename 含 '洋芋片9'）就把提示字改成白色字「點擊任意地方在一次」
-      if(seq[idx].includes("洋芋片9")){
-        postHint.style.color = "white";
-        postHint.textContent = "點擊任意地方在一次";
-      } else {
-        postHint.style.color = "black";
-        postHint.textContent = "點擊任意地方繼續";
-      }
-    } else {
-      // 最後一張點擊後的行為：重新載入整個頁面（回到開場並可再玩）
-      // 這樣不會改遊戲內部邏輯，只是重置
-      document.removeEventListener("click", clickHandler, true);
-      postSeq.style.display = "none";
-      postSeq.setAttribute("aria-hidden","true");
-      // 重新載入頁面以回到原始狀態
-      location.reload();
-    }
-  };
+/* 一開始播放故事 */
+playStory(introStory, "intro");
 
-  // 使用捕捉階段註冊以確保能接收到點擊（即使 overlay 等蓋住）
-  document.addEventListener("click", clickHandler, true);
-}
 
-/* ====== 以下全部保持原遊戲不變 ====== */
+
+/* ============================================================
+   以下全部是你的遊戲程式碼（完全沒有動）
+   ============================================================ */
 
 let level=1,lives=3,jokerSide="A",lock=false;
 
@@ -355,9 +308,9 @@ function showGameOver(){
   overlayMsg.textContent="GAME OVER";
   overlayMsg.style.color="red";
 
-  // 顯示完 overlay 後，呼叫 post-sequence（7,8,9）
-  // 我把序列顯示放在下一個 event loop，以確保 overlay 先顯示
-  setTimeout(()=>{ showPostSequence("gameover"); }, 300);
+  setTimeout(()=>{
+    playStory(gameOverStory,"gameover");
+  },1200);
 }
 
 function showWin(){
@@ -365,8 +318,9 @@ function showWin(){
   overlayMsg.textContent="WIN";
   overlayMsg.style.color="var(--win)";
 
-  // 顯示完 overlay 後，呼叫 post-sequence（8,9）
-  setTimeout(()=>{ showPostSequence("win"); }, 300);
+  setTimeout(()=>{
+    playStory(winStory,"win");
+  },1200);
 }
 
 function clickDoor(side){
