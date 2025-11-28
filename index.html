@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>猜猜小丑在哪裡</title>
+
 <style>
 :root{
   --bg:#bfe8ff;
@@ -11,31 +12,73 @@
   --accent:#ff4b6e;
   --text:#002d59;
   --red:#ff3b3b;
-  --win:#1E90FF; /* WIN藍色 */
+  --win:#1E90FF;
 }
 html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; background:var(--bg);}
 .game-wrap{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:28px; gap:18px;}
 header{width:100%; display:flex; justify-content:center; position:relative;}
 h1{margin:0;font-size:28px;}
-.level-badge{position:absolute; left:18px; top:0; padding:6px 10px; border-radius:10px; font-weight:700; background:rgba(255,255,255,0.25); backdrop-filter: blur(4px);}
+.level-badge{position:absolute; left:18px; top:0; padding:6px 10px; border-radius:10px;
+  font-weight:700; background:rgba(255,255,255,0.25); backdrop-filter: blur(4px);}
 .lives{position:absolute; right:18px; top:0; display:flex; gap:8px;}
 .life{width:18px; height:18px; border-radius:50%; background:var(--red);}
 .life.empty{background:#eee; border:1px solid #aaa;}
+
 .stage{display:flex; gap:32px; justify-content:center; margin-top:20px;}
-.door-card{width:540px; height:420px; background:var(--door); border-radius:16px; position:relative; overflow:hidden; cursor:pointer;}
+
+.door-card{
+  width:540px; height:420px; background:var(--door);
+  border-radius:16px; position:relative; overflow:hidden; cursor:pointer;
+  transition:0.2s;
+}
+
+/* ⛔ 錯誤時抖動動畫 */
+@keyframes shake {
+  0%{ transform:translateX(0);}
+  20%{ transform:translateX(-12px);}
+  40%{ transform:translateX(12px);}
+  60%{ transform:translateX(-8px);}
+  80%{ transform:translateX(8px);}
+  100%{ transform:translateX(0);}
+}
+.shake{ animation:shake 0.4s ease; }
+
 .reveal-area{position:absolute; inset:0; z-index:1; display:flex; justify-content:center; align-items:center;}
 .reveal-img{max-width:100%; max-height:100%; object-fit:cover;}
-.panel{position:absolute; z-index:10; width:50%; top:0; bottom:0; display:flex; justify-content:center; align-items:center; font-size:60px; color:white; font-weight:900; background:var(--door); transition:0.75s;}
+
+.panel{position:absolute; z-index:10; width:50%; top:0; bottom:0; display:flex;
+  justify-content:center; align-items:center; font-size:60px; font-weight:900;
+  background:var(--door); transition:0.75s;}
 .panel.left{ left:0; }
 .panel.right{ right:0; }
 .door-card.open .panel.left{ transform:translateX(-100%); }
 .door-card.open .panel.right{ transform:translateX(100%); }
-.overlay{position:fixed; inset:0; display:flex; justify-content:center; align-items:center; background:rgba(0,0,0,0); pointer-events:none; z-index:999; transition:0.3s;}
+
+/* 🎉 正確時小丑 POP 特效 */
+.pop-clown{
+  position:fixed;
+  left:50%; top:50%;
+  transform:translate(-50%,-50%) scale(0.1);
+  font-size:40px;
+  opacity:0;
+  z-index:9999;
+  animation:pop 0.7s ease-out forwards;
+}
+@keyframes pop {
+  0% { transform:translate(-50%,-50%) scale(0.1); opacity:0; }
+  40%{ transform:translate(-50%,-50%) scale(2.3); opacity:1; }
+  100%{ transform:translate(-50%,-50%) scale(3.3); opacity:0; }
+}
+
+.overlay{position:fixed; inset:0; display:flex; justify-content:center;
+  align-items:center; background:rgba(0,0,0,0); pointer-events:none;
+  z-index:999; transition:0.3s;}
 .overlay-message{opacity:0; font-size:70px; font-weight:900; color:red; transition:0.3s;}
 .overlay.show{background:rgba(0,0,0,0.65); pointer-events:auto;}
 .overlay.show .overlay-message{opacity:1;}
 </style>
 </head>
+
 <body>
 
 <div class="game-wrap">
@@ -70,85 +113,131 @@ h1{margin:0;font-size:28px;}
 <script>
 let level=1, lives=3, jokerSide="A", lock=false;
 
-const JOKER_IMAGES=[
-  "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png","joker/3.png",
-  "joker/4 (2).png","joker/4.png","joker/5.png","joker/546175134_1138063744950693_180659281319095751_n.jpg",
-  "joker/Am I (1).jpg","joker/Am I (2).jpg","joker/Am I (3).jpg","joker/Am I (4).jpg","joker/Am I.jpg",
-  "joker/I am joker. (1).jpg","joker/I am joker. (2).jpg","joker/I am joker. (3).jpg","joker/I am joker. 的複本 (1).jpg",
-  "joker/I am joker..jpg","joker/I am joker..png","joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440-removebg-preview.png",
-  "joker/IMG_20251118_213550_407.jpg","joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp",
-  "joker/unnamed.webp","joker/未命名設計.jpg","joker/未命名設計.png","joker/螢幕擷取畫面 2025-11-20 231537.png",
-  "joker/螢幕擷取畫面 2025-11-20 231953.png","joker/螢幕擷取畫面 2025-11-20 232248.png","joker/螢幕擷取畫面 2025-11-20 232410.png",
-  "joker/螢幕擷取畫面 2025-11-20 232433.png","joker/螢幕擷取畫面 2025-11-20 232449.png","joker/螢幕擷取畫面 2025-11-20 233008.png"
+/* 🎭 小丑圖 */
+const JOKER_IMAGES=[ /* 你的全部joker清單 (保持不變) */ 
+  "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png",
+  "joker/3.png","joker/4 (2).png","joker/4.png","joker/5.png",
+  "joker/546175134_1138063744950693_180659281319095751_n.jpg",
+  "joker/Am I (1).jpg","joker/Am I (2).jpg","joker/Am I (3).jpg","joker/Am I (4).jpg",
+  "joker/Am I.jpg","joker/I am joker. (1).jpg","joker/I am joker. (2).jpg",
+  "joker/I am joker. (3).jpg","joker/I am joker. 的複本 (1).jpg",
+  "joker/I am joker..jpg","joker/I am joker..png",
+  "joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440-removebg-preview.png",
+  "joker/IMG_20251118_213550_407.jpg",
+  "joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp","joker/unnamed.webp",
+  "joker/未命名設計.jpg","joker/未命名設計.png",
+  "joker/螢幕擷取畫面 2025-11-20 231537.png",
+  "joker/螢幕擷取畫面 2025-11-20 231953.png","joker/螢幕擷取畫面 2025-11-20 232248.png",
+  "joker/螢幕擷取畫面 2025-11-20 232410.png","joker/螢幕擷取畫面 2025-11-20 232433.png",
+  "joker/螢幕擷取畫面 2025-11-20 232449.png","joker/螢幕擷取畫面 2025-11-20 233008.png"
 ];
+/* ❌ 錯誤圖 */
 const FILLER_IMAGES=["wrong/Ri86b7h.jpg"];
 
+/* 物件抓取 */
 const doorA=document.getElementById("doorA");
 const doorB=document.getElementById("doorB");
 const imgA=document.getElementById("imgA");
 const imgB=document.getElementById("imgB");
 const overlay=document.getElementById("overlay");
 const overlayMsg=document.getElementById("overlayMsg");
-const levelBadge=document.getElementById("levelBadge");
 
+/* 🔧 更新生命 */
 function updateLives(){
   for(let i=1;i<=3;i++){
     const el=document.getElementById("life"+i);
-    if(i<=lives) el.classList.remove("empty"); else el.classList.add("empty");
+    if(i<=lives) el.classList.remove("empty");
+    else el.classList.add("empty");
   }
 }
 
+/* 隨機圖 */
 function setRandomImages(){
   jokerSide=Math.random()<0.5?"A":"B";
   const jokerImg=JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
   const fillerImg=FILLER_IMAGES[0];
+
   if(jokerSide==="A"){ imgA.src=jokerImg; imgB.src=fillerImg; }
   else{ imgA.src=fillerImg; imgB.src=jokerImg; }
 }
 
+/* 新關卡 */
 function setupLevel(first=false){
-  document.querySelectorAll(".door-card").forEach(d=>d.classList.remove("open"));
+  doorA.classList.remove("open");
+  doorB.classList.remove("open");
   lock=false;
-  levelBadge.textContent=`第${level}關`;
   if(first) setRandomImages();
+  document.getElementById("levelBadge").textContent=`第${level}關`;
 }
 
+/* 顯示結束畫面 */
 function showGameOver(){
   overlay.classList.add("show");
   overlayMsg.textContent="GAME OVER";
   overlayMsg.style.color="red";
 }
 
+/* 顯示WIN */
 function showWin(){
   overlay.classList.add("show");
   overlayMsg.textContent="WIN";
   overlayMsg.style.color="var(--win)";
 }
 
+/* 🎉 正確爆擊動畫 */
+function playCorrectEffect(){
+  const pop=document.createElement("div");
+  pop.className="pop-clown";
+  pop.textContent="🤡";
+  document.body.appendChild(pop);
+  setTimeout(()=>pop.remove(),800);
+}
+
+/* ⛔ 錯誤抖動動畫 */
+function playWrongEffect(door){
+  door.classList.add("shake");
+  setTimeout(()=>door.classList.remove("shake"),400);
+}
+
+/* 門邏輯 */
 function clickDoor(side){
   if(lock) return;
   lock=true;
+
   const door=side==="A"?doorA:doorB;
+  const correct = (side===jokerSide);
+
   door.classList.add("open");
 
+  /* 門顯示後 */
   setTimeout(()=>{
-    door.classList.remove("open"); // 門關閉動畫
 
+    door.classList.remove("open");  // 關門動畫開始
+
+    /* 完全關門後才換圖 */
     setTimeout(()=>{
-      level++; // 不管對錯都增加關卡
 
-      if(side!==jokerSide){
-        lives--; // 選錯扣命
+      /* ⭐⭐ 特效在這裡 ⭐⭐ */
+      if(correct){
+        playCorrectEffect();  // 小丑爆擊 🎉
+      }else{
+        playWrongEffect(door); // 門抖一下 ❌
+        lives--;
         updateLives();
         if(lives<=0){ showGameOver(); return; }
       }
 
-      if(level>6){ showWin(); return; } // 遊戲勝利
+      level++; // 無論對錯都加關卡
+
+      if(level>6){ showWin(); return; }
 
       setRandomImages();
-      levelBadge.textContent=`第${level}關`;
-      lock=false; // 解鎖
+      document.getElementById("levelBadge").textContent=`第${level}關`;
+
+      lock=false;
+
     },750);
+
   },800);
 }
 
