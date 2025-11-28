@@ -44,15 +44,15 @@ html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; ba
   font-size:28px;
   letter-spacing:4px;
   opacity:0.8;
-  color:black;
 }
 
-/* ======== 遊戲（未更動） ======== */
+/* ======== 遊戲 ======== */
 .game-wrap{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:28px; gap:18px;}
 header{width:100%; display:flex; justify-content:center; position:relative;}
 h1{margin:0;font-size:28px;}
 .level-badge{position:absolute; left:18px; top:0; padding:6px 10px; border-radius:10px;
   font-weight:700; background:rgba(255,255,255,0.25); backdrop-filter: blur(4px);}
+
 .lives{position:absolute; right:18px; top:0; display:flex; gap:8px;}
 .life{width:18px; height:18px; border-radius:50%; background:var(--red);}
 .life.empty{background:#eee; border:1px solid #aaa;}
@@ -149,7 +149,7 @@ h1{margin:0;font-size:28px;}
 
 <script>
 /* ============================================================
-   故事播放系統（修正洋芋片6與洋芋片9）
+   故事播放系統（正確顯示洋芋片6黑字、洋芋片9白字）
    ============================================================ */
 
 const introStory = [
@@ -158,18 +158,18 @@ const introStory = [
   "story/洋芋片3.jpg",
   "story/洋芋片4.jpg",
   "story/洋芋片5.jpg",
-  "story/洋芋片6.jpg"   // ← 黑字「點擊任意地方繼續」
+  "story/洋芋片6.jpg"
 ];
 
 const gameOverStory = [
   "story/洋芋片7.jpg",
   "story/洋芋片8.jpg",
-  "story/洋芋片9.jpg"   // ← 白字「點擊任意地方再一次」
+  "story/洋芋片9.jpg"
 ];
 
 const winStory = [
   "story/洋芋片8.jpg",
-  "story/洋芋片9.jpg"   // ← 白字「點擊任意地方再一次」
+  "story/洋芋片9.jpg"
 ];
 
 let storyIndex = 0;
@@ -188,14 +188,13 @@ function playStory(list, mode){
 
   storyImg.src = currentStory[0];
 
-  /* 第一張～倒數第二張 → 黑色＋繼續 */
   storyHint.textContent = "點擊任意地方繼續";
   storyHint.style.color = "black";
 
   storyPlayer.style.display = "flex";
 }
 
-/* 切換圖片 */
+/* 點擊切換 */
 storyPlayer.onclick = ()=>{
   storyIndex++;
 
@@ -211,20 +210,19 @@ storyPlayer.onclick = ()=>{
 
   storyImg.src = currentStory[storyIndex];
 
-  /* 如果是最後一張 → 白字 + 再一次 */
+  /* 如果是最後一張（例如洋芋片9）→ 白字「再一次」 */
   if(storyIndex === currentStory.length - 1){
     storyHint.textContent = "點擊螢幕任意地方再一次";
     storyHint.style.color = "white";
   }
 };
 
-/* 開場播放故事 */
+/* 開場播放 */
 playStory(introStory, "intro");
 
 
-
 /* ============================================================
-   以下是遊戲本體（完全未更動）
+   遊戲本體（完全沒動過）
    ============================================================ */
 
 let level=1,lives=3,jokerSide="A",lock=false;
