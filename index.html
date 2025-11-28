@@ -188,10 +188,21 @@ function playStory(list, mode){
 
   storyImg.src = currentStory[0];
 
-  storyHint.textContent = "點擊任意地方繼續";
-  storyHint.style.color = "black";
+  // 根據圖片名稱設置提示文字和顏色
+  updateHint(currentStory[0]);
 
   storyPlayer.style.display = "flex";
+}
+
+/* 更新提示文字和顏色 */
+function updateHint(imgSrc) {
+  if (imgSrc.includes("洋芋片9")) {
+    storyHint.textContent = "點擊任意地方再一次";
+    storyHint.style.color = "white";
+  } else {
+    storyHint.textContent = "點擊任意地方繼續";
+    storyHint.style.color = "black";
+  }
 }
 
 /* 點擊切換 */
@@ -210,11 +221,8 @@ storyPlayer.onclick = ()=>{
 
   storyImg.src = currentStory[storyIndex];
 
-  /* 如果是最後一張（例如洋芋片9）→ 白字「再一次」 */
-  if(storyIndex === currentStory.length - 1){
-    storyHint.textContent = "點擊螢幕任意地方再一次";
-    storyHint.style.color = "white";
-  }
+  // 每次切換後更新提示
+  updateHint(currentStory[storyIndex]);
 };
 
 /* 開場播放 */
