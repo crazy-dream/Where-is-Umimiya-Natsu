@@ -16,7 +16,7 @@
 }
 html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; background:var(--bg);}
 
-/* ======== 故事播放（修改：全螢幕 cover） ======== */
+/* ======== 故事播放（全螢幕 cover） ======== */
 #storyPlayer{
   position:fixed;
   inset:0;
@@ -64,7 +64,6 @@ h1{margin:0;font-size:28px;}
   border-radius:16px; position:relative; overflow:hidden; cursor:pointer;
   transition:0.2s;
 }
-
 @keyframes shake {
   0%{ transform:translateX(0);}
   20%{ transform:translateX(-12px);}
@@ -118,7 +117,7 @@ h1{margin:0;font-size:28px;}
   <div id="storyHint">點擊任意地方繼續</div>
 </div>
 
-<!-- ======== 遊戲主體（未更動） ======== -->
+<!-- ======== 遊戲主體 ======== -->
 <div class="game-wrap" id="gameArea" style="display:none;">
   <header>
     <div class="level-badge" id="levelBadge">第1關</div>
@@ -150,7 +149,7 @@ h1{margin:0;font-size:28px;}
 
 <script>
 /* ============================================================
-   故事播放系統（已修正提示顏色）
+   故事播放系統（修正洋芋片6與洋芋片9）
    ============================================================ */
 
 const introStory = [
@@ -159,29 +158,29 @@ const introStory = [
   "story/洋芋片3.jpg",
   "story/洋芋片4.jpg",
   "story/洋芋片5.jpg",
-  "story/洋芋片6.jpg"
+  "story/洋芋片6.jpg"   // ← 黑字「點擊任意地方繼續」
 ];
 
 const gameOverStory = [
   "story/洋芋片7.jpg",
   "story/洋芋片8.jpg",
-  "story/洋芋片9.jpg"
+  "story/洋芋片9.jpg"   // ← 白字「點擊任意地方再一次」
 ];
 
 const winStory = [
   "story/洋芋片8.jpg",
-  "story/洋芋片9.jpg"
+  "story/洋芋片9.jpg"   // ← 白字「點擊任意地方再一次」
 ];
 
 let storyIndex = 0;
 let currentStory = introStory;
-let storyMode = "intro"; // intro / gameover / win
+let storyMode = "intro";
 
 const storyPlayer = document.getElementById("storyPlayer");
 const storyImg = document.getElementById("storyImg");
 const storyHint = document.getElementById("storyHint");
 
-/* 顯示故事畫面 */
+/* 顯示故事 */
 function playStory(list, mode){
   currentStory = list;
   storyMode = mode;
@@ -189,21 +188,22 @@ function playStory(list, mode){
 
   storyImg.src = currentStory[0];
 
+  /* 第一張～倒數第二張 → 黑色＋繼續 */
   storyHint.textContent = "點擊任意地方繼續";
   storyHint.style.color = "black";
 
   storyPlayer.style.display = "flex";
 }
 
-/* 點擊切換故事圖片 */
+/* 切換圖片 */
 storyPlayer.onclick = ()=>{
   storyIndex++;
 
   if(storyIndex >= currentStory.length){
-    if(storyMode==="intro"){
+    if(storyMode === "intro"){
       storyPlayer.style.display="none";
       document.getElementById("gameArea").style.display="flex";
-    }else{
+    } else {
       location.reload();
     }
     return;
@@ -211,26 +211,20 @@ storyPlayer.onclick = ()=>{
 
   storyImg.src = currentStory[storyIndex];
 
-  /* ===== 修正重點：依故事類型改提示 ===== */
+  /* 如果是最後一張 → 白字 + 再一次 */
   if(storyIndex === currentStory.length - 1){
-
-    if(storyMode === "intro"){
-      storyHint.textContent = "點擊任意地方繼續";
-      storyHint.style.color = "black";
-    } else {
-      storyHint.textContent = "點擊螢幕任意地方再一次";
-      storyHint.style.color = "white";
-    }
+    storyHint.textContent = "點擊螢幕任意地方再一次";
+    storyHint.style.color = "white";
   }
 };
 
-/* 一開始播放故事 */
+/* 開場播放故事 */
 playStory(introStory, "intro");
 
 
 
 /* ============================================================
-   以下為遊戲程式（完全沒動）
+   以下是遊戲本體（完全未更動）
    ============================================================ */
 
 let level=1,lives=3,jokerSide="A",lock=false;
