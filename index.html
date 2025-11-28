@@ -15,16 +15,21 @@
   --win:#1E90FF;
 }
 html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; background:var(--bg);}
+body{overflow:hidden;}
 
-/* ====== 開場動畫 ====== */
-#storyIntro{
+/* =============================== */
+/* 全螢幕故事播放區                */
+/* =============================== */
+#storyPlayer{
   position:fixed;
   inset:0;
   background:black;
   display:flex;
   justify-content:center;
   align-items:center;
+  flex-direction:column;
   z-index:99999;
+  cursor:pointer;
 }
 #storyImg{
   max-width:100%;
@@ -37,22 +42,25 @@ html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; ba
   top:50%;
   transform:translateY(-50%);
   writing-mode:vertical-rl;
+  font-size:32px;
+  font-weight:700;
   color:white;
-  font-size:28px;
   user-select:none;
 }
 
-/* ====== 遊戲本體 ====== */
+/* =============================== */
+/* 原本的遊戲                      */
+/* =============================== */
 .game-wrap{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:28px; gap:18px;}
 header{width:100%; display:flex; justify-content:center; position:relative;}
 h1{margin:0;font-size:28px;}
 .level-badge{position:absolute; left:18px; top:0; padding:6px 10px; border-radius:10px;
-  font-weight:700; background:rgba(255,255,255,0.25); backdrop-filter: blur(4px);}
-.lives{position:absolute; right:18px; top:0; display:flex; gap:8px;}
-.life{width:18px; height:18px; border-radius:50%; background:var(--red);}
-.life.empty{background:#eee; border:1px solid #aaa;}
+  font-weight:700; background:rgba(255,255,255,0.25); backdrop-filter: blur(4px);} 
+.lives{position:absolute; right:18px; top:0; display:flex; gap:8px;} 
+.life{width:18px; height:18px; border-radius:50%; background:var(--red);} 
+.life.empty{background:#eee; border:1px solid #aaa;} 
 
-.stage{display:flex; gap:32px; justify-content:center; margin-top:20px;}
+.stage{display:flex; gap:32px; justify-content:center; margin-top:20px;} 
 
 .door-card{
   width:540px; height:420px; background:var(--door);
@@ -61,25 +69,25 @@ h1{margin:0;font-size:28px;}
 }
 
 @keyframes shake {
-  0%{ transform:translateX(0);}
-  20%{ transform:translateX(-12px);}
-  40%{ transform:translateX(12px);}
-  60%{ transform:translateX(-8px);}
-  80%{ transform:translateX(8px);}
-  100%{ transform:translateX(0);}
+  0%{ transform:translateX(0);} 
+  20%{ transform:translateX(-12px);} 
+  40%{ transform:translateX(12px);} 
+  60%{ transform:translateX(-8px);} 
+  80%{ transform:translateX(8px);} 
+  100%{ transform:translateX(0);} 
 }
 .shake{ animation:shake 0.4s ease; }
 
-.reveal-area{position:absolute; inset:0; z-index:1; display:flex; justify-content:center; align-items:center;}
-.reveal-img{max-width:100%; max-height:100%; object-fit:cover;}
+.reveal-area{position:absolute; inset:0; z-index:1; display:flex; justify-content:center; align-items:center;} 
+.reveal-img{max-width:100%; max-height:100%; object-fit:cover;} 
 
 .panel{position:absolute; z-index:10; width:50%; top:0; bottom:0; display:flex;
   justify-content:center; align-items:center; font-size:60px; font-weight:900;
-  background:var(--door); transition:0.75s;}
-.panel.left{ left:0; }
-.panel.right{ right:0; }
-.door-card.open .panel.left{ transform:translateX(-100%); }
-.door-card.open .panel.right{ transform:translateX(100%); }
+  background:var(--door); transition:0.75s;} 
+.panel.left{ left:0; } 
+.panel.right{ right:0; } 
+.door-card.open .panel.left{ transform:translateX(-100%); } 
+.door-card.open .panel.right{ transform:translateX(100%); } 
 
 .pop-clown{
   position:fixed;
@@ -98,21 +106,26 @@ h1{margin:0;font-size:28px;}
 
 .overlay{position:fixed; inset:0; display:flex; justify-content:center;
   align-items:center; background:rgba(0,0,0,0); pointer-events:none;
-  z-index:999; transition:0.3s;}
-.overlay-message{opacity:0; font-size:70px; font-weight:900; color:red; transition:0.3s;}
-.overlay.show{background:rgba(0,0,0,0.65); pointer-events:auto;}
-.overlay.show .overlay-message{opacity:1;}
+  z-index:999; transition:0.3s;} 
+.overlay-message{opacity:0; font-size:70px; font-weight:900; color:red; transition:0.3s;} 
+.overlay.show{background:rgba(0,0,0,0.65); pointer-events:auto;} 
+.overlay.show .overlay-message{opacity:1;} 
 </style>
 </head>
 
 <body>
 
-<!-- ====== 開場故事播放 ====== -->
-<div id="storyIntro">
-  <img id="storyImg" src="">
+<!-- ======================= -->
+<!--   故事播放系統          -->
+<!-- ======================= -->
+<div id="storyPlayer">
+  <img id="storyImg" />
   <div id="storyHint">點擊任意地方繼續</div>
 </div>
 
+<!-- ======================= -->
+<!--        遊戲本體         -->
+<!-- ======================= -->
 <div class="game-wrap" id="gameArea" style="display:none;">
   <header>
     <div class="level-badge" id="levelBadge">第1關</div>
@@ -143,159 +156,50 @@ h1{margin:0;font-size:28px;}
 </div>
 
 <script>
-/* ====== 開場故事播放邏輯 ====== */
-const storyImgs=[
-  "story/洋芋片1.jpg",
-  "story/洋芋片2.jpg",
-  "story/洋芋片3.jpg",
-  "story/洋芋片4.jpg",
-  "story/洋芋片5.jpg",
-  "story/洋芋片6.jpg"
-];
-
-let storyIndex=0;
-const storyIntro=document.getElementById("storyIntro");
+/* ======================================================== */
+/*                 故 事 播 放 邏 輯                       */
+/* ======================================================== */
+const storyPlayer=document.getElementById("storyPlayer");
 const storyImg=document.getElementById("storyImg");
+const storyHint=document.getElementById("storyHint");
+const gameArea=document.getElementById("gameArea");
 
-storyImg.src=storyImgs[0];
+let storyList=[];
+let storyIndex=0;
+let storyCallback=null;
 
-storyIntro.onclick=()=>{
+function playStory(images, finalHintColor, callback){
+  storyList=images;
+  storyIndex=0;
+  storyCallback=callback;
+  storyHint.style.color=finalHintColor?finalHintColor:"white";
+  storyImg.src=storyList[0];
+  storyPlayer.style.display="flex";
+  gameArea.style.display="none";
+}
+
+storyPlayer.onclick=()=>{
   storyIndex++;
-  if(storyIndex<storyImgs.length){
-    storyImg.src=storyImgs[storyIndex];
+  if(storyIndex>=storyList.length){
+    storyPlayer.style.display="none";
+    if(storyCallback) storyCallback();
+    return;
+  }
+
+  storyImg.src=storyList[storyIndex];
+
+  if(storyIndex===storyList.length-1){
+    storyHint.textContent="點擊任意地方再一次";
   }else{
-    storyIntro.style.display="none";
-    document.getElementById("gameArea").style.display="flex";
+    storyHint.textContent="點擊任意地方繼續";
   }
 };
 
-/* ====== 以下全部保持原遊戲不變 ====== */
-
+/* ======================================================== */
+/*                     遊 戲 原 本 代 碼                    */
+/* ======================================================== */
 let level=1,lives=3,jokerSide="A",lock=false;
 
 const JOKER_IMAGES=[
   "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png",
-  "joker/3.png","joker/4 (2).png","joker/4.png","joker/5.png",
-  "joker/546175134_1138063744950693_180659281319095751_n.jpg",
-  "joker/Am I (1).jpg","joker/Am I (2).jpg","joker/Am I (3).jpg","joker/Am I (4).jpg",
-  "joker/Am I.jpg","joker/I am joker. (1).jpg","joker/I am joker. (2).jpg",
-  "joker/I am joker. (3).jpg","joker/I am joker. 的複本 (1).jpg",
-  "joker/I am joker..jpg","joker/I am joker..png",
-  "joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440-removebg-preview.png",
-  "joker/IMG_20251118_213550_407.jpg",
-  "joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp","joker/unnamed.webp",
-  "joker/未命名設計.jpg","joker/未命名設計.png",
-  "joker/螢幕擷取畫面 2025-11-20 231537.png",
-  "joker/螢幕擷取畫面 2025-11-20 231953.png","joker/螢幕擷取畫面 2025-11-20 232248.png",
-  "joker/螢幕擷取畫面 2025-11-20 232410.png","joker/螢幕擷取畫面 2025-11-20 232433.png",
-  "joker/螢幕擷取畫面 2025-11-20 232449.png","joker/螢幕擷取畫面 2025-11-20 233008.png"
-];
-const FILLER_IMAGES=["wrong/Ri86b7h.jpg"];
-
-const doorA=document.getElementById("doorA");
-const doorB=document.getElementById("doorB");
-const imgA=document.getElementById("imgA");
-const imgB=document.getElementById("imgB");
-const overlay=document.getElementById("overlay");
-const overlayMsg=document.getElementById("overlayMsg");
-
-function updateLives(){
-  for(let i=1;i<=3;i++){
-    const el=document.getElementById("life"+i);
-    if(i<=lives) el.classList.remove("empty");
-    else el.classList.add("empty");
-  }
-}
-
-function preloadImage(src){
-  return new Promise(resolve=>{
-    const img=new Image();
-    img.onload=()=>resolve(src);
-    img.src=src;
-  });
-}
-
-let nextImages={A:'',B:''};
-async function setRandomImages(){
-  jokerSide=Math.random()<0.5?"A":"B";
-  const jokerImg=JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
-  const fillerImg=FILLER_IMAGES[0];
-
-  if(jokerSide==="A"){ nextImages={A:jokerImg,B:fillerImg}; }
-  else{ nextImages={A:fillerImg,B:jokerImg}; }
-
-  await Promise.all([preloadImage(nextImages.A),preloadImage(nextImages.B)]);
-  imgA.src=nextImages.A;
-  imgB.src=nextImages.B;
-}
-
-function playCorrectEffect(){
-  const pop=document.createElement("div");
-  pop.className="pop-clown";
-  pop.textContent="🤡";
-  document.body.appendChild(pop);
-  setTimeout(()=>pop.remove(),900);
-}
-
-function playWrongEffect(door){
-  door.classList.add("shake");
-  setTimeout(()=>door.classList.remove("shake"),400);
-}
-
-function showGameOver(){
-  overlay.classList.add("show");
-  overlayMsg.textContent="GAME OVER";
-  overlayMsg.style.color="red";
-}
-
-function showWin(){
-  overlay.classList.add("show");
-  overlayMsg.textContent="WIN";
-  overlayMsg.style.color="var(--win)";
-}
-
-function clickDoor(side){
-  if(lock) return;
-  lock=true;
-
-  const door=side==="A"?doorA:doorB;
-  const correct=(side===jokerSide);
-
-  door.classList.add("open");
-
-  if(correct){
-    playCorrectEffect();
-  }else{
-    playWrongEffect(door);
-  }
-
-  setTimeout(()=>{
-    door.classList.remove("open");
-
-    setTimeout(async()=>{
-      if(!correct){
-        lives--;
-        updateLives();
-        if(lives<=0){ showGameOver(); return; }
-      }
-
-      level++;
-      if(level>6){ showWin(); return; }
-
-      document.getElementById("levelBadge").textContent=`第${level}關`;
-      await setRandomImages();
-      lock=false;
-    },750);
-
-  },800);
-}
-
-doorA.onclick=()=>clickDoor("A");
-doorB.onclick=()=>clickDoor("B");
-
-updateLives();
-setRandomImages();
-</script>
-
-</body>
-</html>
+  "joker/3.png","joker/4 (2).png","
