@@ -16,38 +16,33 @@
 }
 html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; background:var(--bg);}
 
-/* Story 層 */
-.story-wrap{
+/* ====== 開場動畫 ====== */
+#storyIntro{
   position:fixed;
   inset:0;
-  background:var(--bg);
+  background:black;
   display:flex;
-  flex-direction:column;
   justify-content:center;
   align-items:center;
-  gap:20px;
-  z-index:9999;
-  text-align:center;
+  z-index:99999;
 }
-.story-slide{
-  display:flex;
-  align-items:center;
-  gap:20px;
+#storyImg{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
 }
-.story-slide img{
-  max-width:200px;
-  border-radius:12px;
-}
-.story-text{
-  writing-mode: vertical-rl;
-  font-size:20px;
-  color:black;
-  font-weight:600;
-  cursor:pointer;
+#storyHint{
+  position:absolute;
+  right:30px;
+  top:50%;
+  transform:translateY(-50%);
+  writing-mode:vertical-rl;
+  color:white;
+  font-size:28px;
   user-select:none;
 }
 
-/* 遊戲原本樣式 */
+/* ====== 遊戲本體 ====== */
 .game-wrap{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:28px; gap:18px;}
 header{width:100%; display:flex; justify-content:center; position:relative;}
 h1{margin:0;font-size:28px;}
@@ -112,18 +107,13 @@ h1{margin:0;font-size:28px;}
 
 <body>
 
-<!-- Story 開場 -->
-<div class="story-wrap" id="storyWrap">
-  <div class="story-slide"><img src="洋芋片1.jpg"><div class="story-text">點擊任意地方繼續</div></div>
-  <div class="story-slide"><img src="洋芋片2.jpg"><div class="story-text">點擊任意地方繼續</div></div>
-  <div class="story-slide"><img src="洋芋片3.jpg"><div class="story-text">點擊任意地方繼續</div></div>
-  <div class="story-slide"><img src="洋芋片4.jpg"><div class="story-text">點擊任意地方繼續</div></div>
-  <div class="story-slide"><img src="洋芋片5.jpg"><div class="story-text">點擊任意地方繼續</div></div>
-  <div class="story-slide"><img src="洋芋片6.jpg"><div class="story-text">點擊任意地方繼續</div></div>
+<!-- ====== 開場故事播放 ====== -->
+<div id="storyIntro">
+  <img id="storyImg" src="">
+  <div id="storyHint">點擊任意地方繼續</div>
 </div>
 
-<!-- 遊戲畫面 -->
-<div class="game-wrap" id="gameWrap" style="display:none;">
+<div class="game-wrap" id="gameArea" style="display:none;">
   <header>
     <div class="level-badge" id="levelBadge">第1關</div>
     <h1>猜猜小丑在哪裡</h1>
@@ -153,27 +143,34 @@ h1{margin:0;font-size:28px;}
 </div>
 
 <script>
+/* ====== 開場故事播放邏輯 ====== */
+const storyImgs=[
+  "story/洋芋片1.jpg",
+  "story/洋芋片2.jpg",
+  "story/洋芋片3.jpg",
+  "story/洋芋片4.jpg",
+  "story/洋芋片5.jpg",
+  "story/洋芋片6.jpg"
+];
+
 let storyIndex=0;
-const storySlides=document.querySelectorAll('.story-slide');
-const storyWrap=document.getElementById('storyWrap');
-const gameWrap=document.getElementById('gameWrap');
+const storyIntro=document.getElementById("storyIntro");
+const storyImg=document.getElementById("storyImg");
 
-function nextStory(){
-  storySlides[storyIndex].style.display='none';
+storyImg.src=storyImgs[0];
+
+storyIntro.onclick=()=>{
   storyIndex++;
-  if(storyIndex>=storySlides.length){
-    storyWrap.style.display='none';
-    gameWrap.style.display='flex';
-    initGame();
+  if(storyIndex<storyImgs.length){
+    storyImg.src=storyImgs[storyIndex];
+  }else{
+    storyIntro.style.display="none";
+    document.getElementById("gameArea").style.display="flex";
   }
-}
+};
 
-storySlides.forEach(slide=>{
-  slide.addEventListener('click',nextStory);
-  slide.addEventListener('touchstart',nextStory);
-});
+/* ====== 以下全部保持原遊戲不變 ====== */
 
-// --- 以下為遊戲原本程式碼，不能改 ---
 let level=1,lives=3,jokerSide="A",lock=false;
 
 const JOKER_IMAGES=[
@@ -195,24 +192,13 @@ const JOKER_IMAGES=[
 ];
 const FILLER_IMAGES=["wrong/Ri86b7h.jpg"];
 
-let doorA,doorB,imgA,imgB,overlay,overlayMsg;
+const doorA=document.getElementById("doorA");
+const doorB=document.getElementById("doorB");
+const imgA=document.getElementById("imgA");
+const imgB=document.getElementById("imgB");
+const overlay=document.getElementById("overlay");
+const overlayMsg=document.getElementById("overlayMsg");
 
-function initGame(){
-  doorA=document.getElementById("doorA");
-  doorB=document.getElementById("doorB");
-  imgA=document.getElementById("imgA");
-  imgB=document.getElementById("imgB");
-  overlay=document.getElementById("overlay");
-  overlayMsg=document.getElementById("overlayMsg");
-
-  updateLives();
-  setRandomImages();
-
-  doorA.onclick=()=>clickDoor("A");
-  doorB.onclick=()=>clickDoor("B");
-}
-
-// 以下遊戲程式保持不變
 function updateLives(){
   for(let i=1;i<=3;i++){
     const el=document.getElementById("life"+i);
@@ -303,6 +289,12 @@ function clickDoor(side){
 
   },800);
 }
+
+doorA.onclick=()=>clickDoor("A");
+doorB.onclick=()=>clickDoor("B");
+
+updateLives();
+setRandomImages();
 </script>
 
 </body>
