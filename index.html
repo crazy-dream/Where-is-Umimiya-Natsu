@@ -7,47 +7,52 @@
 
 <style>
 :root{
-  --bg:#bfe8ff;
-  --door:#3aa0ff;
-  --accent:#ff4b6e;
-  --text:#002d59;
-  --red:#ff3b3b;
-  --win:#1E90FF;
+  --bg:#bfe8ff;
+  --door:#3aa0ff;
+  --accent:#ff4b6e;
+  --text:#002d59;
+  --red:#ff3b3b;
+  --win:#1E90FF;
 }
 html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; background:var(--bg);}
 
-/* ====== 開場動畫 ====== */
-#storyIntro{
-  position:fixed;
-  inset:0;
-  background:black;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  z-index:99999;
-}
-#storyImg{
-  max-width:100%;
-  max-height:100%;
-  object-fit:contain;
-}
-#storyHint{
-  position:absolute;
-  right:30px;
-  top:50%;
-  transform:translateY(-50%);
-  writing-mode:vertical-rl;
-  color:white;
-  font-size:28px;
-  user-select:none;
+/* ======== 故事播放（全螢幕 cover） ======== */
+#storyPlayer{
+  position:fixed;
+  inset:0;
+  background:black;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:99999;
+  flex-direction:column;
 }
 
-/* ====== 遊戲本體 ====== */
+#storyImg{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  background:black;
+}
+
+#storyHint{
+  position:absolute;
+  right:20px;
+  top:50%;
+  transform:translateY(-50%);
+  writing-mode:vertical-rl;
+  font-size:28px;
+  letter-spacing:4px;
+  opacity:0.8;
+}
+
+/* ======== 遊戲 ======== */
 .game-wrap{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:28px; gap:18px;}
 header{width:100%; display:flex; justify-content:center; position:relative;}
 h1{margin:0;font-size:28px;}
 .level-badge{position:absolute; left:18px; top:0; padding:6px 10px; border-radius:10px;
-  font-weight:700; background:rgba(255,255,255,0.25); backdrop-filter: blur(4px);}
+  font-weight:700; background:rgba(255,255,255,0.25); backdrop-filter: blur(4px);}
+
 .lives{position:absolute; right:18px; top:0; display:flex; gap:8px;}
 .life{width:18px; height:18px; border-radius:50%; background:var(--red);}
 .life.empty{background:#eee; border:1px solid #aaa;}
@@ -55,18 +60,17 @@ h1{margin:0;font-size:28px;}
 .stage{display:flex; gap:32px; justify-content:center; margin-top:20px;}
 
 .door-card{
-  width:540px; height:420px; background:var(--door);
-  border-radius:16px; position:relative; overflow:hidden; cursor:pointer;
-  transition:0.2s;
+  width:540px; height:420px; background:var(--door);
+  border-radius:16px; position:relative; overflow:hidden; cursor:pointer;
+  transition:0.2s;
 }
-
 @keyframes shake {
-  0%{ transform:translateX(0);}
-  20%{ transform:translateX(-12px);}
-  40%{ transform:translateX(12px);}
-  60%{ transform:translateX(-8px);}
-  80%{ transform:translateX(8px);}
-  100%{ transform:translateX(0);}
+  0%{ transform:translateX(0);}
+  20%{ transform:translateX(-12px);}
+  40%{ transform:translateX(12px);}
+  60%{ transform:translateX(-8px);}
+  80%{ transform:translateX(8px);}
+  100%{ transform:translateX(0);}
 }
 .shake{ animation:shake 0.4s ease; }
 
@@ -74,31 +78,31 @@ h1{margin:0;font-size:28px;}
 .reveal-img{max-width:100%; max-height:100%; object-fit:cover;}
 
 .panel{position:absolute; z-index:10; width:50%; top:0; bottom:0; display:flex;
-  justify-content:center; align-items:center; font-size:60px; font-weight:900;
-  background:var(--door); transition:0.75s;}
+  justify-content:center; align-items:center; font-size:60px; font-weight:900;
+  background:var(--door); transition:0.75s;}
 .panel.left{ left:0; }
 .panel.right{ right:0; }
 .door-card.open .panel.left{ transform:translateX(-100%); }
 .door-card.open .panel.right{ transform:translateX(100%); }
 
 .pop-clown{
-  position:fixed;
-  left:50%; top:50%;
-  transform:translate(-50%,-50%) scale(0.1);
-  font-size:40px;
-  opacity:0.2;
-  z-index:9999;
-  animation:pop 0.9s ease-out forwards;
+  position:fixed;
+  left:50%; top:50%;
+  transform:translate(-50%,-50%) scale(0.1);
+  font-size:40px;
+  opacity:0.2;
+  z-index:9999;
+  animation:pop 0.9s ease-out forwards;
 }
 @keyframes pop {
-  0% { transform:translate(-50%,-50%) scale(0.1); opacity:0; }
-  40%{ transform:translate(-50%,-50%) scale(3.0); opacity:0.7; }
-  100%{ transform:translate(-50%,-50%) scale(4.0); opacity:0; }
+  0% { transform:translate(-50%,-50%) scale(0.1); opacity:0; }
+  40%{ transform:translate(-50%,-50%) scale(3.0); opacity:0.7; }
+  100%{ transform:translate(-50%,-50%) scale(4.0); opacity:0; }
 }
 
 .overlay{position:fixed; inset:0; display:flex; justify-content:center;
-  align-items:center; background:rgba(0,0,0,0); pointer-events:none;
-  z-index:999; transition:0.3s;}
+  align-items:center; background:rgba(0,0,0,0); pointer-events:none;
+  z-index:999; transition:0.3s;}
 .overlay-message{opacity:0; font-size:70px; font-weight:900; color:red; transition:0.3s;}
 .overlay.show{background:rgba(0,0,0,0.65); pointer-events:auto;}
 .overlay.show .overlay-message{opacity:1;}
@@ -107,88 +111,147 @@ h1{margin:0;font-size:28px;}
 
 <body>
 
-<!-- ====== 開場故事播放 ====== -->
-<div id="storyIntro">
-  <img id="storyImg" src="">
-  <div id="storyHint">點擊任意地方繼續</div>
+<div id="storyPlayer">
+  <img id="storyImg">
+  <div id="storyHint">點擊任意地方繼續</div>
 </div>
 
 <div class="game-wrap" id="gameArea" style="display:none;">
-  <header>
-    <div class="level-badge" id="levelBadge">第1關</div>
-    <h1>猜猜小丑在哪裡</h1>
-    <div class="lives">
-      <div class="life" id="life1"></div>
-      <div class="life" id="life2"></div>
-      <div class="life" id="life3"></div>
-    </div>
-  </header>
+  <header>
+    <div class="level-badge" id="levelBadge">第1關</div>
+    <h1>猜猜小丑在哪裡</h1>
+    <div class="lives">
+      <div class="life" id="life1"></div>
+      <div class="life" id="life2"></div>
+      <div class="life" id="life3"></div>
+    </div>
+  </header>
 
-  <div class="stage">
-    <div class="door-card" id="doorA">
-      <div class="reveal-area"><img id="imgA" class="reveal-img"></div>
-      <div class="panel left">🤡</div>
-      <div class="panel right">🤡</div>
-    </div>
-    <div class="door-card" id="doorB">
-      <div class="reveal-area"><img id="imgB" class="reveal-img"></div>
-      <div class="panel left">🤡</div>
-      <div class="panel right">🤡</div>
-    </div>
-  </div>
+  <div class="stage">
+    <div class="door-card" id="doorA">
+      <div class="reveal-area"><img id="imgA" class="reveal-img"></div>
+      <div class="panel left">🤡</div>
+      <div class="panel right">🤡</div>
+    </div>
+    <div class="door-card" id="doorB">
+      <div class="reveal-area"><img id="imgB" class="reveal-img"></div>
+      <div class="panel left">🤡</div>
+      <div class="panel right">🤡</div>
+    </div>
+  </div>
 </div>
 
 <div class="overlay" id="overlay">
-  <div class="overlay-message" id="overlayMsg">GAME OVER</div>
+  <div class="overlay-message" id="overlayMsg">GAME OVER</div>
 </div>
 
 <script>
-/* ====== 開場故事播放邏輯 ====== */
-const storyImgs=[
-  "story/洋芋片1.jpg",
-  "story/洋芋片2.jpg",
-  "story/洋芋片3.jpg",
-  "story/洋芋片4.jpg",
-  "story/洋芋片5.jpg",
-  "story/洋芋片6.jpg"
+/* ============================================================
+   故事播放系統（已修正洋芋片6黑字、洋芋片9白字邏輯）
+   ============================================================ */
+
+const introStory = [
+  "story/洋芋片1.jpg",
+  "story/洋芋片2.jpg",
+  "story/洋芋片3.jpg",
+  "story/洋芋片4.jpg",
+  "story/洋芋片5.jpg",
+  "story/洋芋片6.jpg"
 ];
 
-let storyIndex=0;
-const storyIntro=document.getElementById("storyIntro");
-const storyImg=document.getElementById("storyImg");
+const gameOverStory = [
+  "story/洋芋片7.jpg",
+  "story/洋芋片8.jpg",
+  "story/洋芋片9.jpg"
+];
 
-storyImg.src=storyImgs[0];
+const winStory = [
+  "story/洋芋片8.jpg",
+  "story/洋芋片9.jpg"
+];
 
-storyIntro.onclick=()=>{
-  storyIndex++;
-  if(storyIndex<storyImgs.length){
-    storyImg.src=storyImgs[storyIndex];
-  }else{
-    storyIntro.style.display="none";
-    document.getElementById("gameArea").style.display="flex";
-  }
+let storyIndex = 0;
+let currentStory = introStory;
+let storyMode = "intro";
+
+const storyPlayer = document.getElementById("storyPlayer");
+const storyImg = document.getElementById("storyImg");
+const storyHint = document.getElementById("storyHint");
+
+/* 顯示故事 */
+function playStory(list, mode){
+  currentStory = list;
+  storyMode = mode;
+  storyIndex = 0;
+
+  storyImg.src = currentStory[0];
+
+  // 這裡保持預設為黑色「繼續」，因為第一張圖通常不是白色背景
+  storyHint.textContent = "點擊任意地方繼續";
+  storyHint.style.color = "black";
+
+  // 特殊處理：如果是 win 或 gameover，且只有一張圖（例如洋芋片9），這裡就應該變白色
+  if(storyMode !== "intro" && currentStory.length === 1){
+    storyHint.textContent = "點擊螢幕任意地方再一次";
+    storyHint.style.color = "white";
+  }
+
+  storyPlayer.style.display = "flex";
+}
+
+/* 點擊切換 */
+storyPlayer.onclick = ()=>{
+  storyIndex++;
+
+  if(storyIndex >= currentStory.length){
+    if(storyMode === "intro"){
+      storyPlayer.style.display="none";
+      document.getElementById("gameArea").style.display="flex";
+    } else {
+      location.reload();
+    }
+    return;
+  }
+
+  storyImg.src = currentStory[storyIndex];
+
+  // 預設將提示文字設為黑色「繼續」（適用於洋芋片6）
+  storyHint.textContent = "點擊任意地方繼續";
+  storyHint.style.color = "black";
+
+  // 只有當不是 intro 模式，且是列表中的最後一張圖時，才切換為白色「再一次」（適用於洋芋片9）
+  if(storyMode !== "intro" && storyIndex === currentStory.length - 1){
+    storyHint.textContent = "點擊螢幕任意地方再一次";
+    storyHint.style.color = "white";
+  }
 };
 
-/* ====== 以下全部保持原遊戲不變 ====== */
+/* 開場播放 */
+playStory(introStory, "intro");
+
+
+/* ============================================================
+   遊戲本體（未更動）
+   ============================================================ */
 
 let level=1,lives=3,jokerSide="A",lock=false;
 
 const JOKER_IMAGES=[
-  "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png",
-  "joker/3.png","joker/4 (2).png","joker/4.png","joker/5.png",
-  "joker/546175134_1138063744950693_180659281319095751_n.jpg",
-  "joker/Am I (1).jpg","joker/Am I (2).jpg","joker/Am I (3).jpg","joker/Am I (4).jpg",
-  "joker/Am I.jpg","joker/I am joker. (1).jpg","joker/I am joker. (2).jpg",
-  "joker/I am joker. (3).jpg","joker/I am joker. 的複本 (1).jpg",
-  "joker/I am joker..jpg","joker/I am joker..png",
-  "joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440-removebg-preview.png",
-  "joker/IMG_20251118_213550_407.jpg",
-  "joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp","joker/unnamed.webp",
-  "joker/未命名設計.jpg","joker/未命名設計.png",
-  "joker/螢幕擷取畫面 2025-11-20 231537.png",
-  "joker/螢幕擷取畫面 2025-11-20 231953.png","joker/螢幕擷取畫面 2025-11-20 232248.png",
-  "joker/螢幕擷取畫面 2025-11-20 232410.png","joker/螢幕擷取畫面 2025-11-20 232433.png",
-  "joker/螢幕擷取畫面 2025-11-20 232449.png","joker/螢幕擷取畫面 2025-11-20 233008.png"
+  "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png",
+  "joker/3.png","joker/4 (2).png","joker/4.png","joker/5.png",
+  "joker/546175134_1138063744950693_180659281319095751_n.jpg",
+  "joker/Am I (1).jpg","joker/Am I (2).jpg","joker/Am I (3).jpg","joker/Am I (4).jpg",
+  "joker/Am I.jpg","joker/I am joker. (1).jpg","joker/I am joker. (2).jpg",
+  "joker/I am joker. (3).jpg","joker/I am joker. 的複本 (1).jpg",
+  "joker/I am joker..jpg","joker/I am joker..png",
+  "joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440-removebg-preview.png",
+  "joker/IMG_20251118_213550_407.jpg",
+  "joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp","joker/unnamed.webp",
+  "joker/未命名設計.jpg","joker/未命名設計.png",
+  "joker/螢幕擷取畫面 2025-11-20 231537.png",
+  "joker/螢幕擷取畫面 2025-11-20 231953.png","joker/螢幕擷取畫面 2025-11-20 232248.png",
+  "joker/螢幕擷取畫面 2025-11-20 232410.png","joker/螢幕擷取畫面 2025-11-20 232433.png",
+  "joker/螢幕擷取畫面 2025-11-20 232449.png","joker/螢幕擷取畫面 2025-11-20 233008.png"
 ];
 const FILLER_IMAGES=["wrong/Ri86b7h.jpg"];
 
@@ -200,94 +263,102 @@ const overlay=document.getElementById("overlay");
 const overlayMsg=document.getElementById("overlayMsg");
 
 function updateLives(){
-  for(let i=1;i<=3;i++){
-    const el=document.getElementById("life"+i);
-    if(i<=lives) el.classList.remove("empty");
-    else el.classList.add("empty");
-  }
+  for(let i=1;i<=3;i++){
+    const el=document.getElementById("life"+i);
+    if(i<=lives) el.classList.remove("empty");
+    else el.classList.add("empty");
+  }
 }
 
 function preloadImage(src){
-  return new Promise(resolve=>{
-    const img=new Image();
-    img.onload=()=>resolve(src);
-    img.src=src;
-  });
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>resolve(src);
+    img.src=src;
+  });
 }
 
 let nextImages={A:'',B:''};
 async function setRandomImages(){
-  jokerSide=Math.random()<0.5?"A":"B";
-  const jokerImg=JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
-  const fillerImg=FILLER_IMAGES[0];
+  jokerSide=Math.random()<0.5?"A":"B";
+  const jokerImg=JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
+  const fillerImg=FILLER_IMAGES[0];
 
-  if(jokerSide==="A"){ nextImages={A:jokerImg,B:fillerImg}; }
-  else{ nextImages={A:fillerImg,B:jokerImg}; }
+  if(jokerSide==="A"){ nextImages={A:jokerImg,B:fillerImg}; }
+  else{ nextImages={A:fillerImg,B:jokerImg}; }
 
-  await Promise.all([preloadImage(nextImages.A),preloadImage(nextImages.B)]);
-  imgA.src=nextImages.A;
-  imgB.src=nextImages.B;
+  await Promise.all([preloadImage(nextImages.A),preloadImage(nextImages.B)]);
+  imgA.src=nextImages.A;
+  imgB.src=nextImages.B;
 }
 
 function playCorrectEffect(){
-  const pop=document.createElement("div");
-  pop.className="pop-clown";
-  pop.textContent="🤡";
-  document.body.appendChild(pop);
-  setTimeout(()=>pop.remove(),900);
+  const pop=document.createElement("div");
+  pop.className="pop-clown";
+  pop.textContent="🤡";
+  document.body.appendChild(pop);
+  setTimeout(()=>pop.remove(),900);
 }
 
 function playWrongEffect(door){
-  door.classList.add("shake");
-  setTimeout(()=>door.classList.remove("shake"),400);
+  door.classList.add("shake");
+  setTimeout(()=>door.classList.remove("shake"),400);
 }
 
 function showGameOver(){
-  overlay.classList.add("show");
-  overlayMsg.textContent="GAME OVER";
-  overlayMsg.style.color="red";
+  overlay.classList.add("show");
+  overlayMsg.textContent="GAME OVER";
+  overlayMsg.style.color="red";
+
+  setTimeout(()=>{
+    playStory(gameOverStory,"gameover");
+  },1200);
 }
 
 function showWin(){
-  overlay.classList.add("show");
-  overlayMsg.textContent="WIN";
-  overlayMsg.style.color="var(--win)";
+  overlay.classList.add("show");
+  overlayMsg.textContent="WIN";
+  overlayMsg.style.color="var(--win)";
+
+  setTimeout(()=>{
+    playStory(winStory,"win");
+  },1200);
 }
 
 function clickDoor(side){
-  if(lock) return;
-  lock=true;
+  if(lock) return;
+  lock=true;
 
-  const door=side==="A"?doorA:doorB;
-  const correct=(side===jokerSide);
+  const door=side==="A"?doorA:doorB;
+  const correct=(side===jokerSide);
 
-  door.classList.add("open");
+  door.classList.add("open");
 
-  if(correct){
-    playCorrectEffect();
-  }else{
-    playWrongEffect(door);
-  }
+  if(correct){
+    playCorrectEffect();
+  }else{
+    playWrongEffect(door);
+  }
 
-  setTimeout(()=>{
-    door.classList.remove("open");
+  setTimeout(()=>{
+    door.classList.remove("open");
 
-    setTimeout(async()=>{
-      if(!correct){
-        lives--;
-        updateLives();
-        if(lives<=0){ showGameOver(); return; }
-      }
+    setTimeout(async()=>{
+      if(!correct){
+        lives--;
+        updateLives();
+        if(lives<=0){ showGameOver(); return; }
+      }
 
-      level++;
-      if(level>6){ showWin(); return; }
+      level++;
+      if(level>6){ showWin(); return; }
 
-      document.getElementById("levelBadge").textContent=`第${level}關`;
-      await setRandomImages();
-      lock=false;
-    },750);
+      document.getElementById("levelBadge").textContent=`第${level}關`;
+      await setRandomImages();
+      lock=false;
+    },750);
 
-  },800);
+  },800);
 }
 
 doorA.onclick=()=>clickDoor("A");
