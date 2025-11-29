@@ -14,112 +14,240 @@
   --red:#ff3b3b;
   --win:#1E90FF;
 }
-html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; background:var(--bg);}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: "Microsoft JhengHei", sans-serif;
+  background: var(--bg);
+  overflow-x: hidden; /* 强制隐藏水平滚动条 */
+  width: 100vw; /* 确保 body 不超过视口宽度 */
+  box-sizing: border-box;
+}
+
+/* 全局限制：所有元素的最大宽度为视口宽度 */
+* {
+  max-width: 100vw;
+  box-sizing: border-box;
+}
 
 /* ======== 故事播放（全螢幕 cover） ======== */
-#storyPlayer{
-  position:fixed;
-  inset:0;
-  background:black;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  z-index:99999;
-  flex-direction:column;
+#storyPlayer {
+  position: fixed;
+  inset: 0;
+  background: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  flex-direction: column;
+  width: 100vw; /* 确保全屏 */
+  height: 100vh;
 }
 
-#storyImg{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  background:black;
+#storyImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: black;
 }
 
-#storyHint{
-  position:absolute;
-  right:20px;
-  top:50%;
-  transform:translateY(-50%);
-  writing-mode:vertical-rl;
-  font-size:28px;
-  letter-spacing:4px;
-  opacity:0.8;
+#storyHint {
+  position: absolute;
+  right: 10px; /* 减少右边距，避免溢出 */
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  font-size: 24px; /* 稍微缩小字体 */
+  letter-spacing: 4px;
+  opacity: 0.8;
+  max-width: 50px; /* 限制宽度 */
 }
 
 /* ======== 遊戲 ======== */
-.game-wrap{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:28px; gap:18px;}
-header{width:100%; display:flex; justify-content:center; position:relative;}
-h1{margin:0;font-size:28px;}
-.level-badge{position:absolute; left:18px; top:0; padding:6px 10px; border-radius:10px;
-  font-weight:700; background:rgba(255,255,255,0.25); backdrop-filter: blur(4px);}
-
-.lives{position:absolute; right:18px; top:0; display:flex; gap:8px;}
-.life{width:18px; height:18px; border-radius:50%; background:var(--red);}
-.life.empty{background:#eee; border:1px solid #aaa;}
-
-.stage{display:flex; gap:32px; justify-content:center; margin-top:20px; flex-wrap: wrap;}
-
-.door-card{
-  width: min(45vw, 540px); /* 自适应宽度：屏幕宽度的45%，最大540px */
-  height: min(35vw, 420px); /* 自适应高度：屏幕宽度的35%，最大420px */
-  background:var(--door);
-  border-radius:16px; position:relative; overflow:hidden; cursor:pointer;
-  transition:0.2s;
+.game-wrap {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px; /* 减少 padding */
+  gap: 10px; /* 减少 gap */
+  box-sizing: border-box;
+  width: 100vw; /* 强制宽度为视口宽度 */
+  max-width: 100vw;
 }
+
+header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+  padding: 0 10px; /* 添加左右 padding 防止溢出 */
+}
+
+h1 {
+  margin: 0;
+  font-size: 24px; /* 缩小标题 */
+  text-align: center;
+}
+
+.level-badge {
+  position: absolute;
+  left: 10px; /* 减少左边距 */
+  top: 0;
+  padding: 4px 8px; /* 缩小 padding */
+  border-radius: 8px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(4px);
+  font-size: 14px; /* 缩小字体 */
+}
+
+.lives {
+  position: absolute;
+  right: 10px; /* 减少右边距 */
+  top: 0;
+  display: flex;
+  gap: 6px; /* 减少 gap */
+}
+
+.life {
+  width: 14px; /* 缩小 */
+  height: 14px;
+  border-radius: 50%;
+  background: var(--red);
+}
+
+.life.empty {
+  background: #eee;
+  border: 1px solid #aaa;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column; /* 垂直排列 */
+  gap: 15px; /* 固定垂直间距 */
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+  width: 100%; /* 确保不超出 */
+  box-sizing: border-box;
+}
+
+.door-card {
+  width: calc(100vw - 20px); /* 宽度为视口宽度减去 padding */
+  max-width: 540px; /* 最大宽度 */
+  height: calc(75vw); /* 高度基于宽度比例 */
+  max-height: 420px; /* 最大高度 */
+  background: var(--door);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
 @keyframes shake {
-  0%{ transform:translateX(0);}
-  20%{ transform:translateX(-12px);}
-  40%{ transform:translateX(12px);}
-  60%{ transform:translateX(-8px);}
-  80%{ transform:translateX(8px);}
-  100%{ transform:translateX(0);}
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-8px); } /* 减少抖动幅度 */
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+  100% { transform: translateX(0); }
 }
-.shake{ animation:shake 0.4s ease; }
 
-.reveal-area{position:absolute; inset:0; z-index:1; display:flex; justify-content:center; align-items:center;}
-.reveal-img{max-width:100%; max-height:100%; object-fit:cover;}
+.shake { animation: shake 0.4s ease; }
 
-.panel{position:absolute; z-index:10; width:50%; top:0; bottom:0; display:flex;
-  justify-content:center; align-items:center; font-size:60px; font-weight:900;
-  background:var(--door); transition:0.75s;}
-.panel.left{ left:0; }
-.panel.right{ right:0; }
-.door-card.open .panel.left{ transform:translateX(-100%); }
-.door-card.open .panel.right{ transform:translateX(100%); }
-
-.pop-clown{
-  position:fixed;
-  left:50%; top:50%;
-  transform:translate(-50%,-50%) scale(0.1);
-  font-size:40px;
-  opacity:0.2;
-  z-index:9999;
-  animation:pop 0.9s ease-out forwards;
+.reveal-area {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
+.reveal-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+}
+
+.panel {
+  position: absolute;
+  z-index: 10;
+  width: 50%;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 50px; /* 缩小字体 */
+  font-weight: 900;
+  background: var(--door);
+  transition: 0.75s;
+}
+
+.panel.left { left: 0; }
+.panel.right { right: 0; }
+.door-card.open .panel.left { transform: translateX(-100%); }
+.door-card.open .panel.right { transform: translateX(100%); }
+
+.pop-clown {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.1);
+  font-size: 30px; /* 缩小 */
+  opacity: 0.2;
+  z-index: 9999;
+  animation: pop 0.9s ease-out forwards;
+}
+
 @keyframes pop {
-  0% { transform:translate(-50%,-50%) scale(0.1); opacity:0; }
-  40%{ transform:translate(-50%,-50%) scale(3.0); opacity:0.7; }
-  100%{ transform:translate(-50%,-50%) scale(4.0); opacity:0; }
+  0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
+  40% { transform: translate(-50%, -50%) scale(2.0); opacity: 0.7; } /* 减少缩放 */
+  100% { transform: translate(-50%, -50%) scale(3.0); opacity: 0; }
 }
 
-.overlay{position:fixed; inset:0; display:flex; justify-content:center;
-  align-items:center; background:rgba(0,0,0,0); pointer-events:none;
-  z-index:999; transition:0.3s;}
-.overlay-message{opacity:0; font-size:70px; font-weight:900; color:red; transition:0.3s;}
-.overlay.show{background:rgba(0,0,0,0.65); pointer-events:auto;}
-.overlay.show .overlay-message{opacity:1;}
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0);
+  pointer-events: none;
+  z-index: 999;
+  transition: 0.3s;
+}
+
+.overlay-message {
+  opacity: 0;
+  font-size: 50px; /* 缩小 */
+  font-weight: 900;
+  color: red;
+  transition: 0.3s;
+}
+
+.overlay.show {
+  background: rgba(0, 0, 0, 0.65);
+  pointer-events: auto;
+}
+
+.overlay.show .overlay-message { opacity: 1; }
 </style>
 </head>
 
 <body>
 
-<!-- ======== 故事播放器 ======== -->
+<!-- ======== 故事播放器 ======== */
 <div id="storyPlayer">
   <img id="storyImg">
   <div id="storyHint">點擊任意地方繼續</div>
 </div>
 
-<!-- ======== 遊戲主體 ======== -->
+<!-- ======== 遊戲主體 ======== */
 <div class="game-wrap" id="gameArea" style="display:none;">
   <header>
     <div class="level-badge" id="levelBadge">第1關</div>
