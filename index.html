@@ -57,10 +57,12 @@ h1{margin:0;font-size:28px;}
 .life{width:18px; height:18px; border-radius:50%; background:var(--red);}
 .life.empty{background:#eee; border:1px solid #aaa;}
 
-.stage{display:flex; gap:32px; justify-content:center; margin-top:20px;}
+.stage{display:flex; gap:32px; justify-content:center; margin-top:20px; flex-wrap: wrap;}
 
 .door-card{
-  width:540px; height:420px; background:var(--door);
+  width: min(45vw, 540px); /* 自适应宽度：屏幕宽度的45%，最大540px */
+  height: min(35vw, 420px); /* 自适应高度：屏幕宽度的35%，最大420px */
+  background:var(--door);
   border-radius:16px; position:relative; overflow:hidden; cursor:pointer;
   transition:0.2s;
 }
