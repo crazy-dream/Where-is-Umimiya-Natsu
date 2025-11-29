@@ -15,7 +15,6 @@
   --win:#1E90FF;
 }
 
-/* 🚫 修掉右邊捲軸 */
 html, body{
   height:100%;
   margin:0;
@@ -24,9 +23,8 @@ html, body{
   overflow:hidden;
 }
 
-/* ======== 故事播放（全螢幕 cover） ======== */
 #storyPlayer{
-  position:fixed;   /* ← 修正：改成固定避免撐出捲軸 */
+  position:fixed;
   inset:0;
   background:black;
   display:flex;
@@ -34,7 +32,7 @@ html, body{
   align-items:center;
   z-index:99999;
   flex-direction:column;
-  overflow:hidden;  /* ← 保證不捲動 */
+  overflow:hidden;
 }
 
 #storyImg{
@@ -55,7 +53,6 @@ html, body{
   opacity:0.8;
 }
 
-/* ======== 遊戲 ======== */
 .game-wrap{
   min-height:100vh;
   display:flex;
@@ -64,7 +61,6 @@ html, body{
   padding:28px;
   gap:18px;
 
-  /* 🚫 修正，避免形成捲動條 */
   position:fixed;
   inset:0;
   overflow:hidden;
@@ -191,7 +187,7 @@ h1{margin:0;font-size:28px;}
   z-index:999;
   transition:0.3s;
 
-  overflow:hidden; /* ← 防止捲動 */
+  overflow:hidden;
 }
 .overlay-message{
   opacity:0;
@@ -207,13 +203,11 @@ h1{margin:0;font-size:28px;}
 
 <body>
 
-<!-- ======== 故事播放器 ======== -->
 <div id="storyPlayer">
   <img id="storyImg">
   <div id="storyHint">點擊任意地方繼續</div>
 </div>
 
-<!-- ======== 遊戲主體 ======== -->
 <div class="game-wrap" id="gameArea" style="display:none;">
   <header>
     <div class="level-badge" id="levelBadge">第1關</div>
@@ -244,9 +238,6 @@ h1{margin:0;font-size:28px;}
 </div>
 
 <script>
-/* ============================================================
-   故事播放系統（正確顯示洋芋片6黑字、洋芋片9白字）
-   ============================================================ */
 
 const introStory = [
   "story/洋芋片1.jpg",
@@ -276,7 +267,6 @@ const storyPlayer = document.getElementById("storyPlayer");
 const storyImg = document.getElementById("storyImg");
 const storyHint = document.getElementById("storyHint");
 
-/* 顯示故事 */
 function playStory(list, mode){
   currentStory = list;
   storyMode = mode;
@@ -289,7 +279,6 @@ function playStory(list, mode){
   storyPlayer.style.display = "flex";
 }
 
-/* 更新提示文字與顏色 */
 function updateHint(imgSrc) {
   if (imgSrc.includes("洋芋片9")) {
     storyHint.textContent = "點擊任意地方再一次";
@@ -300,7 +289,6 @@ function updateHint(imgSrc) {
   }
 }
 
-/* 點擊切換 */
 storyPlayer.onclick = ()=>{
   storyIndex++;
 
@@ -319,17 +307,14 @@ storyPlayer.onclick = ()=>{
   updateHint(currentStory[storyIndex]);
 };
 
-/* 開場播放 */
 playStory(introStory, "intro");
 
 
-/* ============================================================
-   遊戲本體（完全沒動過）
-   ============================================================ */
+
 
 let level=1,lives=3,jokerSide="A",lock=false;
 
-const JOKER_IMAGES=[
+const JOKER_IMAGES = [
   "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png",
   "joker/3.png","joker/4 (2).png","joker/4.png","joker/5.png",
   "joker/546175134_1138063744950693_180659281319095751_n.jpg",
@@ -337,15 +322,25 @@ const JOKER_IMAGES=[
   "joker/Am I.jpg","joker/I am joker. (1).jpg","joker/I am joker. (2).jpg",
   "joker/I am joker. (3).jpg","joker/I am joker. 的複本 (1).jpg",
   "joker/I am joker..jpg","joker/I am joker..png",
-  "joker/IMG_20250806_193336_118.jpg","joker/IMG_20251001_224237_440-removebg-preview.png",
+  "joker/IMG_20250806_193336_118.jpg",
+  "joker/IMG_20251001_224237_440-removebg-preview.png",
   "joker/IMG_20251118_213550_407.jpg",
   "joker/unnamed (1).webp","joker/unnamed (2).webp","joker/unnamed (4).webp","joker/unnamed.webp",
   "joker/未命名設計.jpg","joker/未命名設計.png",
   "joker/螢幕擷取畫面 2025-11-20 231537.png",
   "joker/螢幕擷取畫面 2025-11-20 231953.png","joker/螢幕擷取畫面 2025-11-20 232248.png",
   "joker/螢幕擷取畫面 2025-11-20 232410.png","joker/螢幕擷取畫面 2025-11-20 232433.png",
-  "joker/螢幕擷取畫面 2025-11-20 232449.png","joker/螢幕擷取畫面 2025-11-20 233008.png"
+  "joker/螢幕擷取畫面 2025-11-20 232449.png","joker/螢幕擷取畫面 2025-11-20 233008.png",
+  "joker/IMG_20251129_183753_540.jpg",
+  "joker/IMG_20251129_183759_211.jpg",
+  "joker/IMG_20251129_183804_371.jpg",
+  "joker/IMG_20251129_183808_254.jpg",
+  "joker/Screenshot_20251129_183328_Instagram.jpg",
+  "joker/Screenshot_20251129_183506_Instagram.jpg",
+  "joker/Screenshot_20251129_183517_Instagram.jpg",
+  "joker/Screenshot_20251129_183522_Instagram.jpg"
 ];
+
 const FILLER_IMAGES=["wrong/Ri86b7h.jpg"];
 
 const doorA=document.getElementById("doorA");
