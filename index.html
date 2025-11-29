@@ -14,11 +14,19 @@
   --red:#ff3b3b;
   --win:#1E90FF;
 }
-html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; background:var(--bg);}
+
+/* 🚫 修掉右邊捲軸 */
+html, body{
+  height:100%;
+  margin:0;
+  font-family:"Microsoft JhengHei",sans-serif;
+  background:var(--bg);
+  overflow:hidden;
+}
 
 /* ======== 故事播放（全螢幕 cover） ======== */
 #storyPlayer{
-  position:fixed;
+  position:fixed;   /* ← 修正：改成固定避免撐出捲軸 */
   inset:0;
   background:black;
   display:flex;
@@ -26,6 +34,7 @@ html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; ba
   align-items:center;
   z-index:99999;
   flex-direction:column;
+  overflow:hidden;  /* ← 保證不捲動 */
 }
 
 #storyImg{
@@ -47,21 +56,70 @@ html,body{height:100%; margin:0; font-family:"Microsoft JhengHei",sans-serif; ba
 }
 
 /* ======== 遊戲 ======== */
-.game-wrap{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:28px; gap:18px;}
-header{width:100%; display:flex; justify-content:center; position:relative;}
+.game-wrap{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:28px;
+  gap:18px;
+
+  /* 🚫 修正，避免形成捲動條 */
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+}
+
+header{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  position:relative;
+}
 h1{margin:0;font-size:28px;}
-.level-badge{position:absolute; left:18px; top:0; padding:6px 10px; border-radius:10px;
-  font-weight:700; background:rgba(255,255,255,0.25); backdrop-filter: blur(4px);}
+.level-badge{
+  position:absolute;
+  left:18px;
+  top:0;
+  padding:6px 10px;
+  border-radius:10px;
+  font-weight:700;
+  background:rgba(255,255,255,0.25);
+  backdrop-filter: blur(4px);
+}
 
-.lives{position:absolute; right:18px; top:0; display:flex; gap:8px;}
-.life{width:18px; height:18px; border-radius:50%; background:var(--red);}
-.life.empty{background:#eee; border:1px solid #aaa;}
+.lives{
+  position:absolute;
+  right:18px;
+  top:0;
+  display:flex;
+  gap:8px;
+}
+.life{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:var(--red);
+}
+.life.empty{
+  background:#eee;
+  border:1px solid #aaa;
+}
 
-.stage{display:flex; gap:32px; justify-content:center; margin-top:20px;}
+.stage{
+  display:flex;
+  gap:32px;
+  justify-content:center;
+  margin-top:20px;
+}
 
 .door-card{
-  width:540px; height:420px; background:var(--door);
-  border-radius:16px; position:relative; overflow:hidden; cursor:pointer;
+  width:540px; height:420px;
+  background:var(--door);
+  border-radius:16px;
+  position:relative;
+  overflow:hidden;
+  cursor:pointer;
   transition:0.2s;
 }
 @keyframes shake {
@@ -74,12 +132,34 @@ h1{margin:0;font-size:28px;}
 }
 .shake{ animation:shake 0.4s ease; }
 
-.reveal-area{position:absolute; inset:0; z-index:1; display:flex; justify-content:center; align-items:center;}
-.reveal-img{max-width:100%; max-height:100%; object-fit:cover;}
+.reveal-area{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.reveal-img{
+  max-width:100%;
+  max-height:100%;
+  object-fit:cover;
+}
 
-.panel{position:absolute; z-index:10; width:50%; top:0; bottom:0; display:flex;
-  justify-content:center; align-items:center; font-size:60px; font-weight:900;
-  background:var(--door); transition:0.75s;}
+.panel{
+  position:absolute;
+  z-index:10;
+  width:50%;
+  top:0;
+  bottom:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:60px;
+  font-weight:900;
+  background:var(--door);
+  transition:0.75s;
+}
 .panel.left{ left:0; }
 .panel.right{ right:0; }
 .door-card.open .panel.left{ transform:translateX(-100%); }
@@ -100,10 +180,26 @@ h1{margin:0;font-size:28px;}
   100%{ transform:translate(-50%,-50%) scale(4.0); opacity:0; }
 }
 
-.overlay{position:fixed; inset:0; display:flex; justify-content:center;
-  align-items:center; background:rgba(0,0,0,0); pointer-events:none;
-  z-index:999; transition:0.3s;}
-.overlay-message{opacity:0; font-size:70px; font-weight:900; color:red; transition:0.3s;}
+.overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,0);
+  pointer-events:none;
+  z-index:999;
+  transition:0.3s;
+
+  overflow:hidden; /* ← 防止捲動 */
+}
+.overlay-message{
+  opacity:0;
+  font-size:70px;
+  font-weight:900;
+  color:red;
+  transition:0.3s;
+}
 .overlay.show{background:rgba(0,0,0,0.65); pointer-events:auto;}
 .overlay.show .overlay-message{opacity:1;}
 </style>
@@ -188,13 +284,12 @@ function playStory(list, mode){
 
   storyImg.src = currentStory[0];
 
-  // 根據圖片名稱設置提示文字和顏色
   updateHint(currentStory[0]);
 
   storyPlayer.style.display = "flex";
 }
 
-/* 更新提示文字和顏色 */
+/* 更新提示文字與顏色 */
 function updateHint(imgSrc) {
   if (imgSrc.includes("洋芋片9")) {
     storyHint.textContent = "點擊任意地方再一次";
@@ -221,7 +316,6 @@ storyPlayer.onclick = ()=>{
 
   storyImg.src = currentStory[storyIndex];
 
-  // 每次切換後更新提示
   updateHint(currentStory[storyIndex]);
 };
 
