@@ -3,55 +3,47 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>猜猜小丑在哪裡 — 終極完整版</title>
-<style>
-/* =============== 基本重置 =============== */
-*{box-sizing:border-box}
-html,body{
-  height:100%;
-  margin:0;
-  padding:0;
-  overflow:hidden; /* 絕對禁止捲動條 */
-  font-family:"Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  background:var(--bg, #bfe8ff);
-}
+<title>猜猜小丑在哪裡</title>
 
-/* =============== 變數 =============== */
+<style>
 :root{
   --bg:#bfe8ff;
   --door:#3aa0ff;
-  --door-front:#2a84d6;
   --accent:#ff4b6e;
   --text:#002d59;
   --red:#ff3b3b;
   --win:#1E90FF;
-  --overlay-bg: rgba(0,0,0,0.65);
 }
 
-/* =============== 故事播放器（全螢幕 cover） =============== */
+/* 🚫 修掉右邊捲軸 */
+html, body{
+  height:100%;
+  margin:0;
+  font-family:"Microsoft JhengHei",sans-serif;
+  background:var(--bg);
+  overflow:hidden;
+}
+
+/* ======== 故事播放（全螢幕 cover） ======== */
 #storyPlayer{
-  position:fixed;
+  position:fixed;   /* ← 修正：改成固定避免撐出捲軸 */
   inset:0;
-  background:#000; /* 黑底，避免藍色大海 */
+  background:black;
   display:flex;
   justify-content:center;
   align-items:center;
   z-index:99999;
   flex-direction:column;
-  overflow:hidden;
+  overflow:hidden;  /* ← 保證不捲動 */
 }
 
 #storyImg{
   width:100%;
   height:100%;
   object-fit:cover;
-  background:#000;
-  display:block;
+  background:black;
 }
 
-/* 右側直排提示 */
 #storyHint{
   position:absolute;
   right:20px;
@@ -60,70 +52,46 @@ html,body{
   writing-mode:vertical-rl;
   font-size:28px;
   letter-spacing:4px;
-  font-weight:700;
-  opacity:0.9;
-  color:#fff;
-  text-shadow:0 2px 6px rgba(0,0,0,0.6);
-  pointer-events:none;
+  opacity:0.8;
 }
 
-/* 當載入出錯時的提示（置於中間） */
-#storyFallback{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  color:#fff;
-  font-size:20px;
-  text-align:center;
-  display:none;
-  z-index:100000;
-}
-
-/* =============== 遊戲主體 =============== */
+/* ======== 遊戲 ======== */
 .game-wrap{
-  position:fixed;
-  inset:0;
+  min-height:100vh;
   display:flex;
   flex-direction:column;
   align-items:center;
   padding:28px;
   gap:18px;
-  background:var(--bg);
+
+  /* 🚫 修正，避免形成捲動條 */
+  position:fixed;
+  inset:0;
   overflow:hidden;
-  z-index:1;
 }
 
-/* header */
 header{
   width:100%;
   display:flex;
   justify-content:center;
   position:relative;
-  align-items:center;
-  height:64px;
 }
-h1{margin:0;font-size:28px;color:var(--text);}
-
-/* 關卡徽章 */
+h1{margin:0;font-size:28px;}
 .level-badge{
   position:absolute;
   left:18px;
-  top:12px;
+  top:0;
   padding:6px 10px;
   border-radius:10px;
   font-weight:700;
   background:rgba(255,255,255,0.25);
   backdrop-filter: blur(4px);
-  color:var(--text);
-  box-shadow:0 2px 6px rgba(0,0,0,0.08);
 }
 
-/* 生命 */
 .lives{
   position:absolute;
   right:18px;
-  top:12px;
+  top:0;
   display:flex;
   gap:8px;
 }
@@ -132,36 +100,52 @@ h1{margin:0;font-size:28px;color:var(--text);}
   height:18px;
   border-radius:50%;
   background:var(--red);
-  box-shadow:0 1px 2px rgba(0,0,0,0.2);
 }
-.life.empty{ background:#eee; border:1px solid #aaa; }
+.life.empty{
+  background:#eee;
+  border:1px solid #aaa;
+}
 
-/* 遊戲舞台 */
 .stage{
   display:flex;
   gap:32px;
   justify-content:center;
-  margin-top:10px;
-  align-items:center;
-  flex:1;
-  width:100%;
+  margin-top:20px;
 }
 
-/* 門卡 */
 .door-card{
-  width:540px;
-  height:420px;
+  width:540px; height:420px;
   background:var(--door);
   border-radius:16px;
   position:relative;
   overflow:hidden;
   cursor:pointer;
-  transition:transform 0.18s ease;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  transition:0.2s;
 }
-.door-card:active{ transform:scale(0.995); }
+@keyframes shake {
+  0%{ transform:translateX(0);}
+  20%{ transform:translateX(-12px);}
+  40%{ transform:translateX(12px);}
+  60%{ transform:translateX(-8px);}
+  80%{ transform:translateX(8px);}
+  100%{ transform:translateX(0);}
+}
+.shake{ animation:shake 0.4s ease; }
 
-/* 開門動畫（左右 panel） */
+.reveal-area{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.reveal-img{
+  max-width:100%;
+  max-height:100%;
+  object-fit:cover;
+}
+
 .panel{
   position:absolute;
   z-index:10;
@@ -174,49 +158,20 @@ h1{margin:0;font-size:28px;color:var(--text);}
   font-size:60px;
   font-weight:900;
   background:var(--door);
-  transition:transform 0.75s;
+  transition:0.75s;
 }
 .panel.left{ left:0; }
 .panel.right{ right:0; }
 .door-card.open .panel.left{ transform:translateX(-100%); }
 .door-card.open .panel.right{ transform:translateX(100%); }
 
-/* 顯示圖像的區域 */
-.reveal-area{
-  position:absolute;
-  inset:0;
-  z-index:1;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:transparent;
-}
-.reveal-img{
-  max-width:100%;
-  max-height:100%;
-  object-fit:cover;
-  display:block;
-}
-
-/* 抖動效果 */
-@keyframes shake {
-  0%{ transform:translateX(0);}
-  20%{ transform:translateX(-12px);}
-  40%{ transform:translateX(12px);}
-  60%{ transform:translateX(-8px);}
-  80%{ transform:translateX(8px);}
-  100%{ transform:translateX(0);}
-}
-.shake{ animation:shake 0.4s ease; }
-
-/* 彈出小丑 emoji */
 .pop-clown{
   position:fixed;
   left:50%; top:50%;
   transform:translate(-50%,-50%) scale(0.1);
   font-size:40px;
   opacity:0.2;
-  z-index:99999;
+  z-index:9999;
   animation:pop 0.9s ease-out forwards;
 }
 @keyframes pop {
@@ -225,7 +180,6 @@ h1{margin:0;font-size:28px;color:var(--text);}
   100%{ transform:translate(-50%,-50%) scale(4.0); opacity:0; }
 }
 
-/* 覆蓋層 & 大字 WIN / GAME OVER */
 .overlay{
   position:fixed;
   inset:0;
@@ -234,44 +188,29 @@ h1{margin:0;font-size:28px;color:var(--text);}
   align-items:center;
   background:rgba(0,0,0,0);
   pointer-events:none;
-  z-index:99998;
-  transition:background 0.3s;
-  overflow:hidden;
+  z-index:999;
+  transition:0.3s;
+
+  overflow:hidden; /* ← 防止捲動 */
 }
 .overlay-message{
   opacity:0;
-  font-size:96px;
+  font-size:70px;
   font-weight:900;
-  color:var(--red);
-  transition:opacity 0.3s, transform 0.3s;
-  transform:translateY(20px);
-  text-align:center;
-  text-shadow:0 10px 30px rgba(0,0,0,0.5);
+  color:red;
+  transition:0.3s;
 }
-.overlay.show{ background:var(--overlay-bg); pointer-events:auto; }
-.overlay.show .overlay-message{ opacity:1; transform:translateY(0); }
-
-/* 小尺寸調整 */
-@media (max-width:1200px){
-  .door-card{ width:380px; height:300px; }
-  .panel{ font-size:44px; }
-  .overlay-message{ font-size:64px; }
-}
-@media (max-width:700px){
-  header{ height:56px; }
-  .stage{ flex-direction:column; gap:18px; padding-bottom:40px; }
-  .door-card{ width:90%; height:40vh; max-height:360px; }
-  #storyHint{ font-size:20px; right:12px; }
-}
+.overlay.show{background:rgba(0,0,0,0.65); pointer-events:auto;}
+.overlay.show .overlay-message{opacity:1;}
 </style>
 </head>
+
 <body>
 
-<!-- ======== 故事播放器（全螢幕 cover） ======== -->
-<div id="storyPlayer" aria-hidden="false" role="dialog" aria-label="故事播放">
-  <img id="storyImg" alt="故事圖片">
+<!-- ======== 故事播放器 ======== -->
+<div id="storyPlayer">
+  <img id="storyImg">
   <div id="storyHint">點擊任意地方繼續</div>
-  <div id="storyFallback">故事圖片載入失敗，請確認 /story 資料夾與圖片存在。</div>
 </div>
 
 <!-- ======== 遊戲主體 ======== -->
@@ -279,38 +218,36 @@ h1{margin:0;font-size:28px;color:var(--text);}
   <header>
     <div class="level-badge" id="levelBadge">第1關</div>
     <h1>猜猜小丑在哪裡</h1>
-    <div class="lives" aria-hidden="false">
+    <div class="lives">
       <div class="life" id="life1"></div>
       <div class="life" id="life2"></div>
       <div class="life" id="life3"></div>
     </div>
   </header>
 
-  <div class="stage" role="main" aria-label="遊戲區">
-    <div class="door-card" id="doorA" tabindex="0" aria-label="門 A">
-      <div class="reveal-area"><img id="imgA" class="reveal-img" alt="門 A 內容"></div>
+  <div class="stage">
+    <div class="door-card" id="doorA">
+      <div class="reveal-area"><img id="imgA" class="reveal-img"></div>
       <div class="panel left">🤡</div>
       <div class="panel right">🤡</div>
     </div>
-
-    <div class="door-card" id="doorB" tabindex="0" aria-label="門 B">
-      <div class="reveal-area"><img id="imgB" class="reveal-img" alt="門 B 內容"></div>
+    <div class="door-card" id="doorB">
+      <div class="reveal-area"><img id="imgB" class="reveal-img"></div>
       <div class="panel left">🤡</div>
       <div class="panel right">🤡</div>
     </div>
   </div>
 </div>
 
-<div class="overlay" id="overlay" aria-hidden="true">
+<div class="overlay" id="overlay">
   <div class="overlay-message" id="overlayMsg">GAME OVER</div>
 </div>
 
 <script>
 /* ============================================================
-   資料與設定（你可以輕易修改這裡的圖片路徑陣列）
+   故事播放系統（正確顯示洋芋片6黑字、洋芋片9白字）
    ============================================================ */
 
-/* 故事（intro） - 你要求的 story/洋芋片1.jpg ~ 6.jpg */
 const introStory = [
   "story/洋芋片1.jpg",
   "story/洋芋片2.jpg",
@@ -320,7 +257,6 @@ const introStory = [
   "story/洋芋片6.jpg"
 ];
 
-/* gameover / win 可能使用的 story 片段（可自訂） */
 const gameOverStory = [
   "story/洋芋片7.jpg",
   "story/洋芋片8.jpg",
@@ -332,8 +268,68 @@ const winStory = [
   "story/洋芋片9.jpg"
 ];
 
-/* Joker 圖片池（維持你原始的大量圖） */
-const JOKER_IMAGES = [
+let storyIndex = 0;
+let currentStory = introStory;
+let storyMode = "intro";
+
+const storyPlayer = document.getElementById("storyPlayer");
+const storyImg = document.getElementById("storyImg");
+const storyHint = document.getElementById("storyHint");
+
+/* 顯示故事 */
+function playStory(list, mode){
+  currentStory = list;
+  storyMode = mode;
+  storyIndex = 0;
+
+  storyImg.src = currentStory[0];
+
+  updateHint(currentStory[0]);
+
+  storyPlayer.style.display = "flex";
+}
+
+/* 更新提示文字與顏色 */
+function updateHint(imgSrc) {
+  if (imgSrc.includes("洋芋片9")) {
+    storyHint.textContent = "點擊任意地方再一次";
+    storyHint.style.color = "white";
+  } else {
+    storyHint.textContent = "點擊任意地方繼續";
+    storyHint.style.color = "black";
+  }
+}
+
+/* 點擊切換 */
+storyPlayer.onclick = ()=>{
+  storyIndex++;
+
+  if(storyIndex >= currentStory.length){
+    if(storyMode === "intro"){
+      storyPlayer.style.display="none";
+      document.getElementById("gameArea").style.display="flex";
+    } else {
+      location.reload();
+    }
+    return;
+  }
+
+  storyImg.src = currentStory[storyIndex];
+
+  updateHint(currentStory[storyIndex]);
+};
+
+/* 開場播放 */
+playStory(introStory, "intro");
+
+
+/* ============================================================
+   遊戲本體（完全沒動過）
+   ============================================================ */
+
+let level=1,lives=3,jokerSide="A",lock=false;
+
+const JOKER_IMAGES=[
   "joker/1.png","joker/1000018658.jpeg","joker/1000018659.jpeg","joker/2.png",
   "joker/3.png","joker/4 (2).png","joker/4.png","joker/5.png",
   "joker/546175134_1138063744950693_180659281319095751_n.jpg",
@@ -350,339 +346,120 @@ const JOKER_IMAGES = [
   "joker/螢幕擷取畫面 2025-11-20 232410.png","joker/螢幕擷取畫面 2025-11-20 232433.png",
   "joker/螢幕擷取畫面 2025-11-20 232449.png","joker/螢幕擷取畫面 2025-11-20 233008.png"
 ];
+const FILLER_IMAGES=["wrong/Ri86b7h.jpg"];
 
-/* 補圖（錯誤或空白時的 filler） */
-const FILLER_IMAGES = ["wrong/Ri86b7h.jpg"];
-
-/* ============================================================
-   DOM 元素
-   ============================================================ */
-const storyPlayer = document.getElementById("storyPlayer");
-const storyImg = document.getElementById("storyImg");
-const storyHint = document.getElementById("storyHint");
-const storyFallback = document.getElementById("storyFallback");
-
-const gameArea = document.getElementById("gameArea");
-const doorA = document.getElementById("doorA");
-const doorB = document.getElementById("doorB");
-const imgA = document.getElementById("imgA");
-const imgB = document.getElementById("imgB");
-
-const overlay = document.getElementById("overlay");
-const overlayMsg = document.getElementById("overlayMsg");
-const levelBadge = document.getElementById("levelBadge");
-
-/* 遊戲狀態 */
-let storyIndex = 0;
-let currentStory = introStory;
-let storyMode = "intro"; // intro | gameover | win
-
-let level = 1;
-let lives = 3;
-let lock = false;
-let jokerSide = "A"; // A or B
-let nextImages = {A:'', B:''};
-
-/* ============================================================
-   工具：預載圖片（回傳 promise）
-   ============================================================ */
-function preloadOne(src, timeout=6000){
-  return new Promise((resolve,reject)=>{
-    const img = new Image();
-    let called = false;
-    img.onload = ()=>{ if(!called){ called=true; resolve(src); } };
-    img.onerror = ()=>{ if(!called){ called=true; reject(new Error("fail:"+src)); } };
-    img.src = src;
-    // timeout fallback
-    setTimeout(()=>{ if(!called){ called=true; reject(new Error("timeout:"+src)); } }, timeout);
-  });
-}
-
-/* 批次預載（忽略失敗但回傳成功與否） */
-async function preloadList(list){
-  const results = await Promise.all(list.map(p => preloadOne(p).then(()=>({src:p,ok:true})).catch(()=>({src:p,ok:false}))));
-  return results;
-}
-
-/* ============================================================
-   故事播放器：預載故事圖，避免一開始黑屏或藍色
-   ============================================================ */
-async function startIntroStory(){
-  // 嘗試預載所有 introStory 圖片（若全部失敗會顯示 fallback）
-  try {
-    const preloadRes = await preloadList(introStory);
-    const anyOk = preloadRes.some(r => r.ok);
-    if(!anyOk){
-      // 沒有成功載入任何故事圖片 → 顯示 fallback 但允許點擊進入遊戲
-      storyFallback.style.display = "block";
-      storyHint.style.color = "white";
-      storyImg.style.display = "none";
-    } else {
-      storyFallback.style.display = "none";
-      storyImg.style.display = "block";
-      storyImg.src = introStory[0];
-      updateHint(introStory[0]);
-    }
-  } catch(e){
-    storyFallback.style.display = "block";
-    storyImg.style.display = "none";
-    storyHint.style.color = "white";
-  }
-
-  // 開始監聽點擊
-  storyPlayer.onclick = handleStoryClick;
-}
-
-/* 更新右側提示文字與顏色 */
-function updateHint(imgSrc){
-  if(!imgSrc) { storyHint.textContent = "點擊任意地方繼續"; storyHint.style.color = "white"; return; }
-  if(imgSrc.includes("洋芋片9")) {
-    storyHint.textContent = "點擊任意地方再一次";
-    storyHint.style.color = "white";
-  } else {
-    storyHint.textContent = "點擊任意地方繼續";
-    // 若圖是深色（粗略判斷）就顯白字，否則黑字；但我們沒做圖色分析，預設白字讓可視性穩定
-    storyHint.style.color = "white";
-  }
-}
-
-function handleStoryClick(){
-  storyIndex++;
-  // 若圖片顯示區被隱藏（fallback），直接停止，轉入遊戲
-  if(storyImg.style.display === "none"){
-    // 直接跳轉遊戲
-    storyPlayer.style.display = "none";
-    showGameArea();
-    return;
-  }
-
-  if(storyIndex >= currentStory.length){
-    // 故事播完：收尾動作
-    storyPlayer.style.display = "none";
-    showGameArea();
-    return;
-  }
-
-  // 否則切換到下一張並更新提示
-  const next = currentStory[storyIndex];
-  storyImg.src = next;
-  updateHint(next);
-}
-
-/* ============================================================
-   遊戲相關函式
-   ============================================================ */
+const doorA=document.getElementById("doorA");
+const doorB=document.getElementById("doorB");
+const imgA=document.getElementById("imgA");
+const imgB=document.getElementById("imgB");
+const overlay=document.getElementById("overlay");
+const overlayMsg=document.getElementById("overlayMsg");
 
 function updateLives(){
   for(let i=1;i<=3;i++){
-    const el = document.getElementById("life"+i);
+    const el=document.getElementById("life"+i);
     if(i<=lives) el.classList.remove("empty");
     else el.classList.add("empty");
   }
 }
 
-/* 隨機選定 Joker 在哪一邊，並設置下一輪的圖片（預載） */
-async function setRandomImages(){
-  jokerSide = Math.random() < 0.5 ? "A" : "B";
-  // 隨機挑一張 joker 圖（若載入失敗會使用 filler）
-  const jokerImg = JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
-  const fillerImg = FILLER_IMAGES[0] || "";
-
-  if(jokerSide === "A"){ nextImages = {A:jokerImg, B:fillerImg}; }
-  else { nextImages = {A:fillerImg, B:jokerImg}; }
-
-  // 預載兩張（若其中失敗，使用 filler 替代）
-  try {
-    await Promise.all([
-      preloadOne(nextImages.A).catch(()=>{ nextImages.A = fillerImg; }),
-      preloadOne(nextImages.B).catch(()=>{ nextImages.B = fillerImg; })
-    ]);
-  } catch(e){
-    // 忽略
-  }
-
-  // 設定到 DOM，但不會馬上顯示門已經開啟狀態時會看到的內容（由開門後顯示）
-  imgA.src = nextImages.A;
-  imgB.src = nextImages.B;
+function preloadImage(src){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>resolve(src);
+    img.src=src;
+  });
 }
 
-/* 正確時的特效（彈出小丑） */
+let nextImages={A:'',B:''};
+async function setRandomImages(){
+  jokerSide=Math.random()<0.5?"A":"B";
+  const jokerImg=JOKER_IMAGES[Math.floor(Math.random()*JOKER_IMAGES.length)];
+  const fillerImg=FILLER_IMAGES[0];
+
+  if(jokerSide==="A"){ nextImages={A:jokerImg,B:fillerImg}; }
+  else{ nextImages={A:fillerImg,B:jokerImg}; }
+
+  await Promise.all([preloadImage(nextImages.A),preloadImage(nextImages.B)]);
+  imgA.src=nextImages.A;
+  imgB.src=nextImages.B;
+}
+
 function playCorrectEffect(){
-  const pop = document.createElement("div");
-  pop.className = "pop-clown";
-  pop.textContent = "🤡";
+  const pop=document.createElement("div");
+  pop.className="pop-clown";
+  pop.textContent="🤡";
   document.body.appendChild(pop);
   setTimeout(()=>pop.remove(),900);
 }
 
-/* 錯誤時抖動門 */
 function playWrongEffect(door){
   door.classList.add("shake");
   setTimeout(()=>door.classList.remove("shake"),400);
 }
 
-/* 顯示 GameOver（大字） */
 function showGameOver(){
   overlay.classList.add("show");
-  overlay.setAttribute("aria-hidden","false");
-  overlayMsg.textContent = "GAME OVER";
-  overlayMsg.style.color = "red";
+  overlayMsg.textContent="GAME OVER";
+  overlayMsg.style.color="red";
 
-  // 播放 gameover 的故事片段（若存在）
   setTimeout(()=>{
-    playStory(gameOverStory, "gameover");
+    playStory(gameOverStory,"gameover");
   },1200);
 }
 
-/* 顯示 Win（大字） */
 function showWin(){
   overlay.classList.add("show");
-  overlay.setAttribute("aria-hidden","false");
-  overlayMsg.textContent = "WIN";
-  overlayMsg.style.color = "var(--win)";
+  overlayMsg.textContent="WIN";
+  overlayMsg.style.color="var(--win)";
 
   setTimeout(()=>{
-    playStory(winStory, "win");
+    playStory(winStory,"win");
   },1200);
 }
 
-/* 當玩家點擊一扇門（A 或 B） */
 function clickDoor(side){
   if(lock) return;
-  lock = true;
+  lock=true;
 
-  const doorEl = (side === "A") ? doorA : doorB;
-  const correct = (side === jokerSide);
+  const door=side==="A"?doorA:doorB;
+  const correct=(side===jokerSide);
 
-  // 開門動畫
-  doorEl.classList.add("open");
+  door.classList.add("open");
 
   if(correct){
     playCorrectEffect();
-  } else {
-    playWrongEffect(doorEl);
+  }else{
+    playWrongEffect(door);
   }
 
-  // 關門並在門關閉後更新狀態
   setTimeout(()=>{
-    doorEl.classList.remove("open");
+    door.classList.remove("open");
 
-    setTimeout(async ()=>{
+    setTimeout(async()=>{
       if(!correct){
         lives--;
         updateLives();
-        if(lives <= 0){
-          showGameOver();
-          return;
-        }
+        if(lives<=0){ showGameOver(); return; }
       }
 
       level++;
-      if(level > 6){
-        showWin();
-        return;
-      }
+      if(level>6){ showWin(); return; }
 
-      levelBadge.textContent = `第${level}關`;
+      document.getElementById("levelBadge").textContent=`第${level}關`;
       await setRandomImages();
-      lock = false;
-    }, 750);
+      lock=false;
+    },750);
 
-  }, 800);
+  },800);
 }
 
-/* 新局或顯示遊戲區域 */
-async function showGameArea(){
-  // 初始化遊戲狀態
-  level = 1;
-  lives = 3;
-  lock = false;
-  levelBadge.textContent = `第${level}關`;
-  updateLives();
+doorA.onclick=()=>clickDoor("A");
+doorB.onclick=()=>clickDoor("B");
 
-  // 顯示 DOM
-  gameArea.style.display = "flex";
-  // 延遲一個 micro tick 讓 CSS transition 不會有跳動
-  await setRandomImages();
-  lock = false;
-}
-
-/* ============================================================
-   story 播放器（可用於 gameover / win 的片段）
-   若 mode !== "intro"，故事播完會 reload（跟原版一致）
-   ============================================================ */
-function playStory(list, mode){
-  currentStory = list.slice();
-  storyMode = mode || "intro";
-  storyIndex = 0;
-
-  // 嘗試預載，載不到也要顯示可點擊的畫面
-  preloadList(currentStory).then(res => {
-    const anyOk = res.some(r=>r.ok);
-    if(!anyOk){
-      // 顯示 fallback
-      storyFallback.style.display = "block";
-      storyImg.style.display = "none";
-    } else {
-      storyFallback.style.display = "none";
-      storyImg.style.display = "block";
-      storyImg.src = currentStory[0];
-    }
-  }).catch(()=>{
-    storyFallback.style.display = "block";
-    storyImg.style.display = "none";
-  });
-
-  storyPlayer.style.display = "flex";
-  storyPlayer.onclick = ()=>{
-    storyIndex++;
-    if(storyIndex >= currentStory.length){
-      if(storyMode === "intro"){
-        storyPlayer.style.display = "none";
-        showGameArea();
-      } else {
-        // gameover / win：reload 頁面以回到初始（維持你之前的行為）
-        location.reload();
-      }
-      return;
-    }
-    // 換下一張
-    if(storyImg.style.display !== "none"){
-      storyImg.src = currentStory[storyIndex];
-      updateHint(currentStory[storyIndex]);
-    }
-  };
-}
-
-/* ============================================================
-   綁定門按鈕、鍵盤支援
-   ============================================================ */
-doorA.addEventListener("click", ()=> clickDoor("A"));
-doorB.addEventListener("click", ()=> clickDoor("B"));
-
-/* keyboard support: A / B / Enter (for accessibility) */
-document.addEventListener("keydown", (e)=>{
-  const key = e.key.toLowerCase();
-  if(storyPlayer.style.display !== "none") return; // 在播故事時勿觸發
-  if(key === "a" || key === "1") clickDoor("A");
-  if(key === "b" || key === "2") clickDoor("B");
-  if(key === "enter") {
-    // enter 隨機點一扇門（方便操作）
-    clickDoor(Math.random() < 0.5 ? "A" : "B");
-  }
-});
-
-/* ============================================================
-   初始程序：先預載 story 圖片（避免只看到黑或藍）
-   ============================================================ */
-(function init(){
-  // 先嘗試預載 introStory（若沒有成功也會讓使用者能點擊略過）
-  startIntroStory();
-  // 也先預載一些 joker 圖（減少第一次讀取延遲）
-  // 但不要阻塞故事
-  const subset = JOKER_IMAGES.slice(0,6).concat(FILLER_IMAGES).filter(Boolean);
-  preloadList(subset).catch(()=>{ /* 忽略 */ });
-})();
+updateLives();
+setRandomImages();
 </script>
+
 </body>
 </html>
